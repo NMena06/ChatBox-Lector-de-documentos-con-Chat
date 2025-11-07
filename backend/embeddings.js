@@ -1,16 +1,12 @@
-// embeddings.js
+require('dotenv').config();
+const { poolPromise } = require('./db');
 const Groq = require("groq-sdk");
-const fs = require("fs");
-const path = require("path");
-const pdfParse = require("pdf-parse");
-const mammoth = require("mammoth");
-const xlsx = require("xlsx");
-
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const CHUNK_SIZE = 1500;
 const TOP_K = 3;
 
+// Dividir texto en trozos
 function splitIntoChunks(text) {
   const chunks = [];
   for (let i = 0; i < text.length; i += CHUNK_SIZE) {
@@ -19,6 +15,7 @@ function splitIntoChunks(text) {
   return chunks;
 }
 
+// Rankear por relevancia
 function rankChunks(query, chunks) {
   const qWords = query.toLowerCase().split(/\s+/);
   return chunks
@@ -32,66 +29,28 @@ function rankChunks(query, chunks) {
     .slice(0, TOP_K);
 }
 
-// Extraer texto de Word
-async function readDocx(filePath) {
-  const { value } = await mammoth.extractRawText({ path: filePath });
-  return value;
-}
-
-// Extraer texto de Excel
-function readExcel(filePath) {
-  const wb = xlsx.readFile(filePath);
-  let text = "";
-  wb.SheetNames.forEach(sheet => {
-    const data = xlsx.utils.sheet_to_csv(wb.Sheets[sheet]);
-    text += data + "\n";
-  });
-  return text;
-}
-
-async function answerQuery(query, fileName = null) {
-  const folder = path.join(__dirname, "drive_pdfs");
-  if (!fs.existsSync(folder)) return { text: "No hay documentos disponibles.", sources: [] };
-
-  const files = fs.readdirSync(folder);
-  if (!files.length) return { text: "No hay documentos en la carpeta.", sources: [] };
-
+// Consultar DB y generar respuesta
+async function answerQuery(query, tablas = ['ms_ayuda', 'ms_ayuda_item', 'ms_ayuda_tipo_item']) {
+  const pool = await poolPromise;
   let allChunks = [];
 
-  const processFile = async (file) => {
-    const ext = path.extname(file).toLowerCase();
-    const filePath = path.join(folder, file);
-    let text = "";
+  for (const tabla of tablas) {
+    const result = await pool.request().query(`SELECT * FROM ${tabla}`);
+    const registros = result.recordset;
 
-    try {
-      if (ext === ".pdf") {
-        const dataBuffer = fs.readFileSync(filePath);
-        text = (await pdfParse(dataBuffer)).text;
-      } else if (ext === ".docx") {
-        text = await readDocx(filePath);
-      } else if (ext === ".xlsx" || ext === ".xls") {
-        text = readExcel(filePath);
-      } else return;
-    } catch (err) {
-      console.error(`Error leyendo ${file}:`, err.message);
-      return;
-    }
-
-    splitIntoChunks(text).forEach(chunk => {
-      allChunks.push({ name: file, content: chunk });
+    registros.forEach(reg => {
+      // Concatenamos todas las columnas como texto
+      const text = Object.values(reg).join(" | ");
+      splitIntoChunks(text).forEach(chunk => {
+        allChunks.push({ name: tabla, content: chunk });
+      });
     });
-  };
-
-  if (fileName) {
-    const targetFile = files.find(f => f === fileName);
-    if (!targetFile) return { text: `No se encontró el archivo: ${fileName}`, sources: [] };
-    await processFile(targetFile);
-  } else {
-    for (const file of files) await processFile(file);
   }
 
+  if (!allChunks.length) return { text: "No hay registros en la base de datos.", sources: [] };
+
   const topChunks = rankChunks(query, allChunks);
-  if (!topChunks.length) return { text: "No se encontraron fragmentos relevantes.", sources: [] };
+  if (!topChunks.length) return { text: "No se encontraron registros relevantes.", sources: [] };
 
   const context = topChunks.map(d => `${d.name}:\n${d.content}`).join("\n\n");
 
@@ -99,19 +58,18 @@ async function answerQuery(query, fileName = null) {
     const response = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
       messages: [
-        { role: "system", content: "Respondé solo basándote en los documentos disponibles." },
-        { role: "user", content: `Documentos relevantes:\n${context}\n\nPregunta: ${query}` }
+        { role: "system", content: "Respondé solo basándote en los registros disponibles en la base de datos." },
+        { role: "user", content: `Registros relevantes:\n${context}\n\nPregunta: ${query}` }
       ]
     });
 
-    // Mandamos el texto y los nombres de los documentos usados como "fuentes"
-    return { 
+    return {
       text: response.choices[0].message.content,
-      sources: topChunks.map(c => ({ name: c.name })) 
+      sources: topChunks.map(c => ({ name: c.name }))
     };
   } catch (err) {
     console.error("Error en Groq:", err.message);
-    return { text: "Error generando la respuesta. Puede ser que el contenido sea muy grande.", sources: [] };
+    return { text: "Error generando la respuesta.", sources: [] };
   }
 }
 
