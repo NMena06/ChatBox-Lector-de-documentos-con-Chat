@@ -30,7 +30,16 @@ function rankChunks(query, chunks) {
 }
 
 // Consultar DB y generar respuesta
-async function answerQuery(query, tablas = ['ms_ayuda', 'ms_ayuda_item', 'ms_ayuda_tipo_item']) {
+async function answerQuery(query, tablas = [
+  'ms_ayuda', 
+  'ms_ayuda_item', 
+  'ms_ayuda_tipo_item',
+  'Clientes',
+  'Motos',
+  'ListaPrecios',
+  'Comprobantes'
+]) {
+
   const pool = await poolPromise;
   let allChunks = [];
 
