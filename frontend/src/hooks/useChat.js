@@ -114,6 +114,33 @@ export const useChat = () => {
       showConfirmButton: false
     });
   };
+// Agrega esta función al hook useChat
+const getAvailableScripts = async () => {
+  try {
+    const resp = await fetch(`${API_BASE}/scripts`);
+    const data = await resp.json();
+    return data.scripts || {};
+  } catch (error) {
+    console.error('Error obteniendo scripts:', error);
+    return {};
+  }
+};
+
+const executeScript = async (scriptName, params = {}) => {
+  try {
+    const resp = await fetch(`${API_BASE}/execute-script`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scriptName, params })
+    });
+    
+    const data = await resp.json();
+    return data;
+  } catch (error) {
+    console.error('Error ejecutando script:', error);
+    return { success: false, error: error.message };
+  }
+};
 
   return {
     query,
@@ -124,6 +151,8 @@ export const useChat = () => {
     sendQuery,
     handleKeyPress,
     loadHistory,
-    clearChat
+    clearChat,
+    getAvailableScripts,
+  executeScript
   };
 };

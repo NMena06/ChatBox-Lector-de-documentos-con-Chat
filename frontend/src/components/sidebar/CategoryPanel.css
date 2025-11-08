@@ -1,0 +1,141 @@
+.category-panel {
+  padding: 15px;
+}
+
+.category-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.category-header h3 {
+  margin: 0 0 5px 0;
+  /* color: #2c3e50; */
+   color: #ffffff; 
+  font-size: 1.2em;
+}
+
+.category-header p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.9em;
+}
+
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.table-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.table-card:hover {
+  border-color: #3498db;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.table-card.active {
+  border-color: #3498db;
+  background: #e8f4fd;
+}
+
+.table-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.table-icon {
+  font-size: 1.3em;
+}
+
+.table-name {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95em;
+}
+
+.table-description {
+  color: #7f8c8d;
+  font-size: 0.8em;
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+
+.table-arrow {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  color: #bdc3c7;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.table-card:hover .table-arrow {
+  transform: translateX(3px);
+  color: #3498db;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.action-btn {
+  padding: 12px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.action-btn.primary {
+  background: #3498db;
+  color: white;
+}
+
+.action-btn.primary:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+}
+
+.action-btn.secondary {
+  background: #ecf0f1;
+  color: #2c3e50;
+  border: 1px solid #bdc3c7;
+}
+
+.action-btn.secondary:hover {
+  background: #d5dbdb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tables-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-card {
+    padding: 12px;
+  }
+}

@@ -19,7 +19,57 @@
   backdrop-filter: blur(4px);
   animation: fadeIn var(--transition-normal);
 }
+/* Estilos generales de la aplicación */
+.app-container {
+  display: flex;
+  height: 100vh;
+  background: #ffffff;
+}
 
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar-overlay {
+    display: block;
+  }
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #ffffff;
+}
+
+/* Cuando se muestran tablas, el chat-container se adapta */
+.chat-container:has(.table-view) {
+  background: #f8f9fa;
+}
+
+/* Ocultar completamente el chat input cuando se muestran tablas */
+.chat-container:has(.table-view) .chat-input-container {
+  display: none !important;
+}
+
+/* Asegurar que el header siempre esté visible */
+.chat-header {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 15px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  z-index: 10;
+  position: relative;
+}
 /* ===== RESPONSIVE DESIGN ===== */
 @media (min-width: 769px) {
   .sidebar-open {

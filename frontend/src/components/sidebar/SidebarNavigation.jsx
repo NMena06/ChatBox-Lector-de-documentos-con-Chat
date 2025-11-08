@@ -1,32 +1,52 @@
 import React from 'react';
-import './SidebarNavigation.css'
+import './SidebarNavigation.css';
+
 const SidebarNavigation = ({ activeSidebarTab, setActiveSidebarTab }) => {
+  const menuCategories = [
+    {
+      id: 'productos',
+      name: 'Productos',
+      icon: '🛍️'
+    },
+    {
+      id: 'contabilidad', 
+      name: 'Contabilidad',
+      icon: '💰'
+    },
+    {
+      id: 'ventas',
+      name: 'Ventas',
+      icon: '📊'
+    },
+    {
+      id: 'clientes',
+      name: 'Clientes', 
+      icon: '👥'
+    },
+    {
+      id: 'scripts',
+      name: 'Scripts',
+      icon: '⚡'
+    },
+    {
+      id: 'help',
+      name: 'Ayuda',
+      icon: '💡'
+    }
+  ];
+
   return (
     <div className="sidebar-navigation">
-      <button 
-        className={`nav-btn ${activeSidebarTab === 'tables' ? 'active' : ''}`}
-        onClick={() => setActiveSidebarTab('tables')}
-      >
-        📊 Tablas
-      </button>
-      <button 
-        className={`nav-btn ${activeSidebarTab === 'conversations' ? 'active' : ''}`}
-        onClick={() => setActiveSidebarTab('conversations')}
-      >
-        💬 Conversaciones
-      </button>
-      <button 
-        className={`nav-btn ${activeSidebarTab === 'help' ? 'active' : ''}`}
-        onClick={() => setActiveSidebarTab('help')}
-      >
-        💡 Ayuda Rápida
-      </button>
-      <button 
-        className={`nav-btn ${activeSidebarTab === 'commands' ? 'active' : ''}`}
-        onClick={() => setActiveSidebarTab('commands')}
-      >
-        ⌨️ Comandos
-      </button>
+      {menuCategories.map(category => (
+        <button 
+          key={category.id}
+          className={`nav-btn ${activeSidebarTab === category.id ? 'active' : ''}`}
+          onClick={() => setActiveSidebarTab(category.id)}
+        >
+          <span className="nav-icon">{category.icon}</span>
+          <span className="nav-text">{category.name}</span>
+        </button>
+      ))}
     </div>
   );
 };

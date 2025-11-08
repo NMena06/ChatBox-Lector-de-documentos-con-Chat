@@ -5,14 +5,14 @@ import ChatHeader from './components/chat/ChatHeader';
 import ChatMessages from './components/chat/ChatMessages';
 import ChatInput from './components/chat/ChatInput';
 import TableCRUD from './components/tables/TableCRUD';
+import AccountingCRUD from './components/tables/AccountingCRUD';
 import { useChat } from './hooks/useChat';
 import { useTables } from './hooks/useTables';
 import { useConversations } from './hooks/useConversations';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeSidebarTab, setActiveSidebarTab] = useState('tables');
-  const [openHelpCategory, setOpenHelpCategory] = useState(null);
+  const [activeSidebarTab, setActiveSidebarTab] = useState('productos');
 
   // Usar hooks personalizados
   const chat = useChat();
@@ -68,6 +68,40 @@ export default function App() {
     }
   };
 
+  // Función para determinar qué CRUD usar
+  const renderTableCRUD = () => {
+    const accountingTables = ['Transacciones', 'Balances', 'Comprobantes'];
+    
+    if (accountingTables.includes(tables.selectedTable)) {
+      return (
+        <AccountingCRUD 
+          tableData={tables.tableData}
+          editingRow={tables.editingRow}
+          setEditingRow={tables.setEditingRow}
+          newRow={tables.newRow}
+          setNewRow={tables.setNewRow}
+          handleAddRow={tables.handleAddRow}
+          handleUpdateRow={tables.handleUpdateRow}
+          handleDeleteRow={tables.handleDeleteRow}
+          selectedTable={tables.selectedTable}
+        />
+      );
+    } else {
+      return (
+        <TableCRUD 
+          tableData={tables.tableData}
+          editingRow={tables.editingRow}
+          setEditingRow={tables.setEditingRow}
+          newRow={tables.newRow}
+          setNewRow={tables.setNewRow}
+          handleAddRow={tables.handleAddRow}
+          handleUpdateRow={tables.handleUpdateRow}
+          handleDeleteRow={tables.handleDeleteRow}
+        />
+      );
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Sidebar */}
@@ -104,30 +138,22 @@ export default function App() {
             loading={tables.loading}
             loadTableData={tables.loadTableData}
             setShowTables={tables.setShowTables}
-            TableCRUD={() => (
-              <TableCRUD 
-                tableData={tables.tableData}
-                editingRow={tables.editingRow}
-                setEditingRow={tables.setEditingRow}
-                newRow={tables.newRow}
-                setNewRow={tables.setNewRow}
-                handleAddRow={tables.handleAddRow}
-                handleUpdateRow={tables.handleUpdateRow}
-                handleDeleteRow={tables.handleDeleteRow}
-              />
-            )}
+            TableCRUD={renderTableCRUD}
             chat={chat.chat}
             messagesEndRef={chat.messagesEndRef}
           />
         </div>
 
-        <ChatInput 
-          query={chat.query}
-          setQuery={chat.setQuery}
-          handleKeyPress={chat.handleKeyPress}
-          loading={chat.loading}
-          sendQuery={chat.sendQuery}
-        />
+        {/* 🆕 Ocultar ChatInput cuando se muestran tablas */}
+        {!tables.showTables && (
+          <ChatInput 
+            query={chat.query}
+            setQuery={chat.setQuery}
+            handleKeyPress={chat.handleKeyPress}
+            loading={chat.loading}
+            sendQuery={chat.sendQuery}
+          />
+        )}
       </div>
     </div>
   );

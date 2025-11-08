@@ -1,11 +1,13 @@
 import React from 'react';
 import SidebarNavigation from './SidebarNavigation';
-import TablesPanel from './TablesPanel';
-import ConversationsPanel from './ConversationsPanel';
+import ProductosPanel from './ProductosPanel';
+import ContabilidadPanel from './ContabilidadPanel';
+import VentasPanel from './VentasPanel';
+import ScriptsPanel from './ScriptsPanel';
 import HelpPanel from './HelpPanel';
-import CommandsPanel from './CommandsPanel';
 import mvRodados from '../../mvRodados.png';
-import './Sidebar.css'
+import './Sidebar.css';
+
 const Sidebar = ({ 
   sidebarOpen, 
   setSidebarOpen, 
@@ -26,7 +28,8 @@ const Sidebar = ({
         <img 
           src={mvRodados} 
           alt="MV Rodados" 
-          style={{ height: '100px', objectFit: 'contain' }} 
+          className="sidebar-logo"
+           height="60px"
         />
         <button 
           className="sidebar-close"
@@ -42,33 +45,52 @@ const Sidebar = ({
       />
       
       <div className="sidebar-content">
-        {activeSidebarTab === 'tables' && (
-          <TablesPanel 
+        {activeSidebarTab === 'productos' && (
+          <ProductosPanel 
             tables={tables}
             selectedTable={selectedTable}
             loadTableData={loadTableData}
           />
         )}
         
-        {activeSidebarTab === 'conversations' && (
-          <ConversationsPanel 
-            conversations={conversations}
-            formatDate={formatDate}
-            setShowTables={setShowTables}
+        {activeSidebarTab === 'contabilidad' && (
+          <ContabilidadPanel 
+            tables={tables}
+            selectedTable={selectedTable}
+            loadTableData={loadTableData}
           />
         )}
         
-        {activeSidebarTab === 'help' && (
+        {activeSidebarTab === 'ventas' && (
+          <VentasPanel 
+            tables={tables}
+            selectedTable={selectedTable}
+            loadTableData={loadTableData}
+          />
+        )}
+        
+        {activeSidebarTab === 'clientes' && (
+          <VentasPanel 
+            tables={tables}
+            selectedTable={selectedTable}
+            loadTableData={loadTableData}
+          />
+        )}
+        
+        {activeSidebarTab === 'scripts' && (
+          <ScriptsPanel 
+            usePrompt={usePrompt}
+            selectedTable={selectedTable}
+          />
+        )}
+        
+        {/* {activeSidebarTab === 'help' && (
           <HelpPanel 
             usePrompt={usePrompt}
             quickAction={quickAction}
             setShowTables={setShowTables}
           />
-        )}
-        
-        {activeSidebarTab === 'commands' && (
-          <CommandsPanel />
-        )}
+        )} */}
       </div>
     </div>
   );

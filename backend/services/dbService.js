@@ -111,14 +111,26 @@ class DBService {
     }
   }
 
-  async selectRecords(tableName, condition = '', fields = [], limit = 100) {
+async selectRecords(tableName, condition = '', fields = [], limit = 100) {
+  try {
+    // Verificar que la tabla existe antes de consultar
+    const schema = await this.getSchema();
+    if (!schema[tableName]) {
+      throw new Error(`La tabla "${tableName}" no existe en la base de datos`);
+    }
+
     const selectedFields = fields.length > 0 ? 
       fields.map(f => `[${f}]`).join(', ') : '*';
     
-    let whereClause = condition ? `WHERE ${condition}` : '';
+    let whereClause = '';
+    if (condition && condition.trim()) {
+      whereClause = `WHERE ${condition}`;
+    }
+    
     const limitClause = limit ? `TOP ${limit}` : '';
 
     const query = `SELECT ${limitClause} ${selectedFields} FROM ${tableName} ${whereClause} ORDER BY 1 DESC`;
+    console.log("🔍 Ejecutando SELECT:", query);
     
     const result = await this.executeQuery(query);
     
@@ -131,7 +143,11 @@ class DBService {
     } else {
       throw new Error(result.error);
     }
+  } catch (error) {
+    console.error(`❌ Error en selectRecords para tabla ${tableName}:`, error);
+    throw error;
   }
+}
 
   async updateRecord(tableName, data, condition) {
     const setClause = Object.keys(data)

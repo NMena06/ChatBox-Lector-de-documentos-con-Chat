@@ -74,4 +74,39 @@ router.delete('/history/:conversationId', async (req, res) => {
   }
 });
 
+// Obtener scripts disponibles
+router.get('/scripts', async (req, res) => {
+  try {
+    const scripts = chatController.getAvailableScripts();
+    res.json({ success: true, scripts });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Ejecutar script específico
+router.post('/execute-script', async (req, res) => {
+  try {
+    const { scriptName, params } = req.body;
+    const result = await chatController.executeSpecificScript(scriptName, params);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+// Obtener scripts disponibles
+router.get('/scripts', async (req, res) => {
+  try {
+    const scripts = chatController.getAvailableScripts();
+    res.json({ 
+      success: true, 
+      scripts: {
+        generales: scripts.generales || [],
+        tablas: scripts.tablas || {}
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
 module.exports = router;

@@ -185,7 +185,11 @@ export const useTables = () => {
       });
     });
   };
-
+const goBackToChat = () => {
+  setShowTables(false);
+  setSelectedTable('');
+  setTableData([]);
+};
   return {
     tables,
     selectedTable,
@@ -201,6 +205,7 @@ export const useTables = () => {
     loadTableData,
     handleAddRow,
     handleUpdateRow,
+    goBackToChat,
     handleDeleteRow
   };
 };

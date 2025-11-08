@@ -1,6 +1,7 @@
 import React from 'react';
 import Message from './Message';
 import './ChatMessages.css';
+
 const ChatMessages = ({ 
   showTables, 
   selectedTable, 
@@ -16,12 +17,13 @@ const ChatMessages = ({
       <div className="table-view">
         <div className="table-header">
           <h3>📋 {selectedTable}</h3>
-          <div>
+          <div className="table-actions">
             <button 
               className="refresh-button"
               onClick={() => loadTableData(selectedTable)}
+              disabled={loading}
             >
-              🔄 Actualizar
+              {loading ? '🔄 Cargando...' : '🔄 Actualizar'}
             </button>
             <button 
               className="back-button"
@@ -33,7 +35,10 @@ const ChatMessages = ({
         </div>
         
         {loading ? (
-          <div className="loading-table">Cargando datos...</div>
+          <div className="loading-table">
+            <div className="loading-spinner"></div>
+            Cargando datos de {selectedTable}...
+          </div>
         ) : (
           <TableCRUD />
         )}
