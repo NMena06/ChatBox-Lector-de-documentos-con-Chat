@@ -1,5 +1,5 @@
 import React from 'react';
-
+import './SidebarNavigation.css'
 const SidebarNavigation = ({ activeSidebarTab, setActiveSidebarTab }) => {
   return (
     <div className="sidebar-navigation">

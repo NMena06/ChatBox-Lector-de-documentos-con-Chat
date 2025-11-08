@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { commandsData } from '../../data/commandsData';
-
+import './CommandsPanel.css'; 
 const CommandsPanel = () => {
   const [openHelpCategory, setOpenHelpCategory] = useState(null);
 

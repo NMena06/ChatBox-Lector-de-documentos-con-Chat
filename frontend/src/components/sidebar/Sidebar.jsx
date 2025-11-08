@@ -5,7 +5,7 @@ import ConversationsPanel from './ConversationsPanel';
 import HelpPanel from './HelpPanel';
 import CommandsPanel from './CommandsPanel';
 import mvRodados from '../../mvRodados.png';
-
+import './Sidebar.css'
 const Sidebar = ({ 
   sidebarOpen, 
   setSidebarOpen, 

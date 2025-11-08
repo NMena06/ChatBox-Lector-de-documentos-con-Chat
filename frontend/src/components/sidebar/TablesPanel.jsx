@@ -1,5 +1,5 @@
 import React from 'react';
-
+import './TablesPanel.css'
 const TablesPanel = ({ tables, selectedTable, loadTableData }) => {
   return (
     <div className="tables-section">

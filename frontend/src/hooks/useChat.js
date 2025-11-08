@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
+const API_BASE = 'http://localhost:3001/api';
+
 export const useChat = () => {
   const [query, setQuery] = useState('');
   const [chat, setChat] = useState([]);
@@ -12,18 +14,22 @@ export const useChat = () => {
   }, [chat]);
 
   const loadHistory = () => {
-    fetch('http://localhost:3001/history')
+    fetch(`${API_BASE}/history`)
       .then(res => res.json())
       .then(data => {
-        setChat(data.history?.map(m => ({
-          role: m.role,
-          text: m.message,
-          sources: JSON.parse(m.sources || '[]'),
-          timestamp: m.createdAt
-        })) || []);
+        if (data.success) {
+          setChat(data.history?.map(m => ({
+            role: m.role,
+            text: m.message,
+            sources: m.sources || [],
+            timestamp: m.createdAt
+          })) || []);
+        } else {
+          throw new Error(data.error);
+        }
       })
       .catch(err => {
-        console.error(err);
+        console.error('Error cargando historial:', err);
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -48,10 +54,10 @@ export const useChat = () => {
     setChat(c => [...c, { role: 'user', text: query, timestamp: new Date() }]);
 
     try {
-      const resp = await fetch('http://localhost:3001/chat', {
+      const resp = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query })
+        body: JSON.stringify({ message: query }) // Cambiado de 'query' a 'message'
       });
       
       if (!resp.ok) {
@@ -59,6 +65,8 @@ export const useChat = () => {
       }
       
       const data = await resp.json();
+      console.log('Respuesta del servidor:', data); // Para debug
+      
       const responseText = data.response?.text || data.response || 'Sin respuesta';
       
       setChat(c => [...c, { 

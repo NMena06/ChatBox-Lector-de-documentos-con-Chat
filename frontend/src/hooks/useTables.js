@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 
+const API_BASE = 'http://localhost:3001/api';
+
 export const useTables = () => {
   const [tables, setTables] = useState([]);
   const [selectedTable, setSelectedTable] = useState('');
@@ -11,15 +13,17 @@ export const useTables = () => {
   const [loading, setLoading] = useState(false);
 
   const loadTables = () => {
-    fetch('http://localhost:3001/tables')
+    fetch(`${API_BASE}/tables`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           setTables(data.tables || []);
+        } else {
+          throw new Error(data.error);
         }
       })
       .catch(err => {
-        console.error(err);
+        console.error('Error cargando tablas:', err);
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -33,7 +37,7 @@ export const useTables = () => {
     setSelectedTable(tableName);
     setLoading(true);
     
-    fetch(`http://localhost:3001/tables/${tableName}`)
+    fetch(`${API_BASE}/tables/${tableName}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -46,6 +50,8 @@ export const useTables = () => {
             timer: 2000,
             showConfirmButton: false
           });
+        } else {
+          throw new Error(data.error);
         }
       })
       .catch(err => {
@@ -54,7 +60,7 @@ export const useTables = () => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: `No se pudo cargar la tabla ${tableName}`,
+          text: `No se pudo cargar la tabla ${tableName}: ${err.message}`,
           timer: 3000
         });
       })
@@ -72,7 +78,7 @@ export const useTables = () => {
       return;
     }
     
-    fetch(`http://localhost:3001/tables/${selectedTable}`, {
+    fetch(`${API_BASE}/tables/${selectedTable}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newRow)
@@ -90,12 +96,7 @@ export const useTables = () => {
           showConfirmButton: false
         });
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error: ' + data.error,
-          timer: 3000
-        });
+        throw new Error(data.error);
       }
     })
     .catch(err => {
@@ -103,14 +104,14 @@ export const useTables = () => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error al agregar registro',
+        text: `Error al agregar registro: ${err.message}`,
         timer: 3000
       });
     });
   };
 
   const handleUpdateRow = (id, data) => {
-    fetch(`http://localhost:3001/tables/${selectedTable}/${id}`, {
+    fetch(`${API_BASE}/tables/${selectedTable}/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -128,12 +129,7 @@ export const useTables = () => {
           showConfirmButton: false
         });
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error: ' + data.error,
-          timer: 3000
-        });
+        throw new Error(data.error);
       }
     })
     .catch(err => {
@@ -141,7 +137,7 @@ export const useTables = () => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error al actualizar registro',
+        text: `Error al actualizar registro: ${err.message}`,
         timer: 3000
       });
     });
@@ -161,7 +157,7 @@ export const useTables = () => {
 
     if (!result.isConfirmed) return;
     
-    fetch(`http://localhost:3001/tables/${selectedTable}/${id}`, {
+    fetch(`${API_BASE}/tables/${selectedTable}/${id}`, {
       method: 'DELETE'
     })
     .then(res => res.json())
@@ -176,12 +172,7 @@ export const useTables = () => {
           showConfirmButton: false
         });
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error: ' + data.error,
-          timer: 3000
-        });
+        throw new Error(data.error);
       }
     })
     .catch(err => {
@@ -189,7 +180,7 @@ export const useTables = () => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error al eliminar registro',
+        text: `Error al eliminar registro: ${err.message}`,
         timer: 3000
       });
     });

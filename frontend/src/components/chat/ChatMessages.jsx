@@ -1,6 +1,6 @@
 import React from 'react';
 import Message from './Message';
-
+import './ChatMessages.css';
 const ChatMessages = ({ 
   showTables, 
   selectedTable, 

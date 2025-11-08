@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { helpData } from '../../data/helpData';
-
+import './HelpPanel.css'
 const HelpPanel = ({ usePrompt, quickAction, setShowTables }) => {
   const [openHelpCategory, setOpenHelpCategory] = useState(null);
 

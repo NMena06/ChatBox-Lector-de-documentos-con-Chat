@@ -1,5 +1,5 @@
 import React from 'react';
-
+import './ChatInput.css';
 const ChatInput = ({ query, setQuery, handleKeyPress, loading, sendQuery }) => {
   return (
     <div className="chat-input-container">

@@ -1,6 +1,6 @@
 import React from 'react';
 import Swal from 'sweetalert2';
-
+import './ConversationsPanel.css'
 const ConversationsPanel = ({ conversations, formatDate, setShowTables }) => {
   const handleNewConversation = () => {
     setShowTables(false);

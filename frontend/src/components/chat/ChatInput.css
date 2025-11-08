@@ -1,0 +1,105 @@
+/* ===== INPUT MEJORADO ===== */
+.chat-input-container {
+  padding: 1.75rem 2.5rem;
+  background: white;
+  border-top: 1px solid var(--gray-200);
+  position: relative;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  max-width: 100%;
+  position: relative;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 1.25rem 1.5rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-xl);
+  font-size: 0.9375rem;
+  resize: none;
+  outline: none;
+  transition: all var(--transition-normal);
+  background: white;
+  min-height: 60px;
+  max-height: 120px;
+  font-family: inherit;
+  line-height: 1.5;
+  box-shadow: var(--shadow-sm);
+}
+
+.chat-input:focus {
+  border-color: var(--primary-500);
+  box-shadow: 
+    0 0 0 3px rgba(59, 130, 246, 0.1),
+    var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.chat-input:disabled {
+  background: var(--gray-50);
+  cursor: not-allowed;
+  border-color: var(--gray-300);
+}
+
+.send-button {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-xl);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.send-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left var(--transition-slow);
+}
+
+.send-button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--shadow-xl);
+}
+
+.send-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.send-button:active:not(:disabled) {
+  transform: translateY(0) scale(1);
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.send-button svg {
+  width: 22px;
+  height: 22px;
+  transition: transform var(--transition-fast);
+}
+
+.send-button:hover:not(:disabled) svg {
+  transform: scale(1.1);
+}

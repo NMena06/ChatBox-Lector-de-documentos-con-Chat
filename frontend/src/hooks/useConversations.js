@@ -1,17 +1,23 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
 
+const API_BASE = 'http://localhost:3001/api';
+
 export const useConversations = () => {
   const [conversations, setConversations] = useState([]);
 
   const loadConversations = () => {
-    fetch('http://localhost:3001/conversations')
+    fetch(`${API_BASE}/conversations`)
       .then(res => res.json())
       .then(data => {
-        setConversations(data.conversations || []);
+        if (data.success) {
+          setConversations(data.conversations || []);
+        } else {
+          throw new Error(data.error);
+        }
       })
       .catch(err => {
-        console.error(err);
+        console.error('Error cargando conversaciones:', err);
         Swal.fire({
           icon: 'error',
           title: 'Error',

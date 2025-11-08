@@ -1,5 +1,5 @@
 import React from 'react';
-
+import './ChatHeader.css';
 const ChatHeader = ({ sidebarOpen, setSidebarOpen, loading }) => {
   return (
     <div className="chat-header">

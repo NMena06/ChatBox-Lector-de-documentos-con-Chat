@@ -1,0 +1,141 @@
+/* ===== PANEL DE COMANDOS ===== */
+.commands-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.commands-panel h3 {
+  color: var(--gray-300);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.commands-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.command-category {
+  background: var(--gray-700);
+  border: 1px solid var(--gray-600);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.category-header:hover {
+  background: var(--gray-650);
+}
+
+.category-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--gray-200);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.category-icon {
+  font-size: 1rem;
+}
+
+.category-arrow {
+  transition: transform var(--transition-fast);
+  color: var(--gray-400);
+}
+
+.category-arrow.open {
+  transform: rotate(180deg);
+}
+
+.category-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--transition-normal);
+}
+
+.category-content.open {
+  max-height: 500px;
+}
+
+.command-list {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.command-item {
+  background: var(--gray-600);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--gray-500);
+}
+
+.command-title {
+  font-weight: 600;
+  color: var(--gray-200);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.command-description {
+  color: var(--gray-400);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+}
+
+.keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.keyword-tag {
+  background: var(--gray-500);
+  color: var(--gray-200);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.usage-tips {
+  background: var(--gray-700);
+  border: 1px solid var(--gray-600);
+  padding: 1.25rem;
+  border-radius: var(--radius-lg);
+}
+
+.usage-tips h4 {
+  color: var(--gray-300);
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.usage-tips ul {
+  color: var(--gray-400);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  padding-left: 1rem;
+}
+
+.usage-tips li {
+  margin-bottom: 0.25rem;
+}
