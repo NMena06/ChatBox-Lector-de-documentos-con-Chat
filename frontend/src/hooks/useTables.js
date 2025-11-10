@@ -43,13 +43,13 @@ export const useTables = () => {
         if (data.success) {
           setTableData(data.data);
           setShowTables(true);
-          Swal.fire({
-            icon: 'success',
-            title: 'Tabla cargada',
-            text: `Datos de ${tableName} cargados correctamente`,
-            timer: 2000,
-            showConfirmButton: false
-          });
+          // Swal.fire({
+          //   icon: 'success',
+          //   title: 'Tabla cargada',
+          //   text: `Datos de ${tableName} cargados correctamente`,
+          //   timer: 2000,
+          //   showConfirmButton: false
+          // });
         } else {
           throw new Error(data.error);
         }

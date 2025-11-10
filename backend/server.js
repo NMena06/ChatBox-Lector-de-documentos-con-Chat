@@ -8,6 +8,7 @@ const chatRoutes = require('./routes/chatRoutes');
 const crudRoutes = require('./routes/crudRoutes');
 const articulosRoutes = require('./routes/articulos'); // 🔥 NUEVA RUTA
 const accountingRoutes = require('./routes/accountingRoutes'); // Si tienes rutas de contabilidad
+const comprobantesRoutes = require('./routes/comprobantesRoutes');
 
 // Importar servicios para inicialización
 const { Database } = require('./config/database');
@@ -18,7 +19,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use('/api/comprobantes', comprobantesRoutes);
 // Rutas
 app.use('/api', chatRoutes);
 app.use('/api', crudRoutes);

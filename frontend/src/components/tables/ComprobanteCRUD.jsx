@@ -2,44 +2,54 @@ import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import './ComprobanteCRUD.css';
 
-const ComprobanteCRUD = ({ 
+const ComprobanteCRUD = ({
   tableData,
   newRow,
   setNewRow,
   handleAddRow,
-  handleDeleteRow,
-  isAccordionOpen,
-  setIsAccordionOpen
+  handleDeleteRow
 }) => {
   const [loading, setLoading] = useState(false);
   const [tiposComprobante, setTiposComprobante] = useState([]);
   const [clientes, setClientes] = useState([]);
-  const [filters, setFilters] = useState({
-    search: '',
-    tipo: '',
-    estado: ''
-  });
+  const [articulos, setArticulos] = useState([]);
+  const [items, setItems] = useState([]);
+  const [newItem, setNewItem] = useState({ id_articulo: '', cantidad: '', precio: '' });
+const [isAccordionOpen, setIsAccordionOpen] = useState(true); 
+  const safeNewRow = newRow || {
+  id_tipo_comprobante: '',
+  id_cliente: '',
+  numero: '',
+  fecha: new Date().toISOString().split('T')[0],
+  total: 0,
+  estado: 'pendiente',
+  observaciones: ''
+};
 
-  // Cargar datos iniciales
+
   useEffect(() => {
     loadDatosIniciales();
-  }, []);
+    if (!tableData || tableData.length === 0) {
+      setIsAccordionOpen(true);
+    }
+  }, [tableData]);
 
   const loadDatosIniciales = async () => {
     try {
       setLoading(true);
-      
-      const [tiposRes, clientesRes] = await Promise.all([
-        fetch('http://localhost:3001/api/comprobantes/tipos'),
-        fetch('http://localhost:3001/api/tables/Clientes?limit=1000')
+      const [tiposRes, clientesRes, articulosRes] = await Promise.all([
+        fetch('http://localhost:3001/api/tables/TipoComprobante'),
+        fetch('http://localhost:3001/api/tables/Clientes?limit=1000'),
+        fetch('http://localhost:3001/api/tables/Articulos?limit=1000')
       ]);
 
       const tiposData = await tiposRes.json();
       const clientesData = await clientesRes.json();
+      const articulosData = await articulosRes.json();
 
       if (tiposData.success) setTiposComprobante(tiposData.data);
       if (clientesData.success) setClientes(clientesData.data);
-      
+      if (articulosData.success) setArticulos(articulosData.data);
     } catch (error) {
       console.error('Error cargando datos:', error);
       Swal.fire('Error', 'No se pudieron cargar los datos iniciales', 'error');
@@ -48,18 +58,14 @@ const ComprobanteCRUD = ({
     }
   };
 
-  const toggleAccordion = () => setIsAccordionOpen(prev => !prev);
-
-  // 🔥 CORREGIDO: Manejar cambio de tipo
   const handleTipoChange = async (tipoId) => {
     const tipoIdNum = tipoId ? parseInt(tipoId) : null;
     setNewRow(prev => ({ ...prev, id_tipo_comprobante: tipoIdNum }));
-    
+
     if (tipoIdNum) {
       try {
         const response = await fetch(`http://localhost:3001/api/comprobantes/proximo-numero/${tipoIdNum}`);
         const data = await response.json();
-        
         if (data.success) {
           setNewRow(prev => ({ ...prev, numero: data.data.numero }));
         }
@@ -69,30 +75,36 @@ const ComprobanteCRUD = ({
     }
   };
 
-  // 🔥 CORREGIDO: Manejar creación de comprobante
+  // 🔥 Calcular total automáticamente
+  useEffect(() => {
+    const total = items.reduce((sum, i) => sum + parseFloat(i.subtotal || 0), 0);
+    setNewRow(prev => ({ ...prev, total }));
+  }, [items]);
+
   const handleAddComprobante = async () => {
-    // 🔥 VALIDACIÓN CORREGIDA - id_cliente es obligatorio
-    if (!newRow.id_tipo_comprobante || !newRow.id_cliente || !newRow.numero || !newRow.fecha || !newRow.total) {
-      Swal.fire('Campos requeridos', 'Complete tipo, cliente, número, fecha y total', 'warning');
+    if (!newRow.id_tipo_comprobante || !newRow.id_cliente || !newRow.numero || !newRow.fecha) {
+      Swal.fire('Campos requeridos', 'Complete tipo, cliente, número y fecha', 'warning');
+      return;
+    }
+
+    if (items.length === 0) {
+      Swal.fire('Sin ítems', 'Debe agregar al menos un artículo al comprobante', 'warning');
       return;
     }
 
     setLoading(true);
     try {
-      // 🔥 PREPARAR DATOS CORRECTAMENTE según la estructura de tu tabla
       const comprobanteData = {
         id_tipo_comprobante: parseInt(newRow.id_tipo_comprobante),
-        id_cliente: parseInt(newRow.id_cliente), // 🔥 OBLIGATORIO según tu tabla
+        id_cliente: parseInt(newRow.id_cliente),
         numero: newRow.numero.toString(),
         fecha: newRow.fecha,
-        total: parseFloat(newRow.total),
-        estado: newRow.estado || 'pendiente', // 🔥 Usar 'pendiente' en minúsculas como el DEFAULT
-        observaciones: newRow.observaciones || ''
+        total: parseFloat(newRow.total) || 0,
+        estado: newRow.estado || 'pendiente',
+        observaciones: newRow.observaciones || '',
+        items
       };
 
-      console.log('📤 Enviando datos a comprobantes:', comprobanteData);
-
-      // 🔥 Usar el endpoint correcto para comprobantes
       const response = await fetch('http://localhost:3001/api/comprobantes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -102,8 +114,9 @@ const ComprobanteCRUD = ({
       const data = await response.json();
 
       if (data.success) {
-        Swal.fire('¡Éxito!', data.message || 'Comprobante creado correctamente', 'success');
+        Swal.fire('✅ Éxito', data.message || 'Comprobante creado correctamente', 'success');
         setNewRow({});
+        setItems([]);
         setIsAccordionOpen(false);
         window.location.reload();
       } else {
@@ -117,45 +130,29 @@ const ComprobanteCRUD = ({
     }
   };
 
-  // 🔥 CORREGIDO: Función para manejar cambios en campos
   const handleFieldChange = (field, value) => {
-    setNewRow(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setNewRow(prev => ({ ...prev, [field]: value }));
   };
 
-  // Renderizar campo del formulario
   const renderFormField = (field, value, onChange, config = {}) => {
     const fieldConfigs = {
       id_tipo_comprobante: {
         type: 'select',
         options: tiposComprobante,
-        placeholder: 'Seleccionar tipo de comprobante',
-        getLabel: (item) => `${item.nombre} (${item.codigo})`,
-        getValue: (item) => item.id
+        placeholder: 'Seleccionar tipo',
+        getLabel: (i) => `${i.nombre} (${i.codigo})`,
+        getValue: (i) => i.id
       },
       id_cliente: {
         type: 'select',
         options: clientes,
-        placeholder: 'Seleccionar cliente *',
-        getLabel: (item) => `${item.nombre} ${item.apellido || ''}`.trim(),
-        getValue: (item) => item.id,
-        required: true // 🔥 Cliente es obligatorio
+        placeholder: 'Seleccionar cliente',
+        getLabel: (i) => `${i.nombre} ${i.apellido || ''}`,
+        getValue: (i) => i.id
       },
-      numero: {
-        type: 'text',
-        placeholder: 'Número de comprobante *'
-      },
-      fecha: {
-        type: 'date',
-        defaultValue: new Date().toISOString().split('T')[0]
-      },
-      total: {
-        type: 'number',
-        placeholder: '0.00 *',
-        step: '0.01'
-      },
+      numero: { type: 'text', placeholder: 'Número de comprobante' },
+      fecha: { type: 'date', defaultValue: new Date().toISOString().split('T')[0] },
+      total: { type: 'number', step: '0.01', placeholder: 'Total', disabled: true },
       estado: {
         type: 'select',
         options: [
@@ -164,14 +161,10 @@ const ComprobanteCRUD = ({
           { id: 'cancelado', nombre: 'Cancelado' }
         ],
         placeholder: 'Seleccionar estado',
-        getLabel: (item) => item.nombre,
-        getValue: (item) => item.id
+        getLabel: (i) => i.nombre,
+        getValue: (i) => i.id
       },
-      observaciones: {
-        type: 'textarea',
-        placeholder: 'Observaciones adicionales...',
-        rows: 3
-      }
+      observaciones: { type: 'textarea', placeholder: 'Observaciones...', rows: 3 }
     };
 
     const fieldConfig = { ...fieldConfigs[field], ...config };
@@ -183,8 +176,6 @@ const ComprobanteCRUD = ({
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             className="form-input"
-            disabled={fieldConfig.disabled}
-            required={fieldConfig.required}
           >
             <option value="">{fieldConfig.placeholder}</option>
             {fieldConfig.options?.map((item) => (
@@ -201,9 +192,8 @@ const ComprobanteCRUD = ({
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={fieldConfig.placeholder}
-            className="form-input textarea"
             rows={fieldConfig.rows}
-            disabled={fieldConfig.disabled}
+            className="form-input textarea"
           />
         );
 
@@ -214,8 +204,6 @@ const ComprobanteCRUD = ({
             value={value || fieldConfig.defaultValue}
             onChange={(e) => onChange(e.target.value)}
             className="form-input"
-            disabled={fieldConfig.disabled}
-            required={fieldConfig.required}
           />
         );
 
@@ -224,12 +212,11 @@ const ComprobanteCRUD = ({
           <input
             type="number"
             step={fieldConfig.step}
-            placeholder={fieldConfig.placeholder}
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             className="form-input"
+            placeholder={fieldConfig.placeholder}
             disabled={fieldConfig.disabled}
-            required={fieldConfig.required}
           />
         );
 
@@ -237,272 +224,145 @@ const ComprobanteCRUD = ({
         return (
           <input
             type="text"
-            placeholder={fieldConfig.placeholder}
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
+            placeholder={fieldConfig.placeholder}
             className="form-input"
             disabled={fieldConfig.disabled}
-            required={fieldConfig.required}
           />
         );
     }
   };
 
-  // Formulario de creación
-  const renderAddForm = () => (
-    <div className="add-row-form" onClick={(e) => e.stopPropagation()}>
-      <div className="form-header">
-        <h3>📄 Nuevo Comprobante</h3>
-        <p>Complete los datos del comprobante (* campos obligatorios)</p>
-      </div>
-
-      <div className="form-fields grid-2">
-        <div className="form-field-group">
-          <label className="form-label">Tipo de Comprobante *</label>
-          {renderFormField('id_tipo_comprobante', newRow.id_tipo_comprobante, 
-            (value) => handleTipoChange(value),
-            { required: true }
-          )}
-        </div>
-
-        <div className="form-field-group">
-          <label className="form-label">Cliente *</label>
-          {renderFormField('id_cliente', newRow.id_cliente, 
-            (value) => handleFieldChange('id_cliente', value),
-            { required: true }
-          )}
-        </div>
-
-        <div className="form-field-group">
-          <label className="form-label">Número *</label>
-          {renderFormField('numero', newRow.numero, 
-            (value) => handleFieldChange('numero', value),
-            { required: true, disabled: true } // Número generado automáticamente
-          )}
-        </div>
-
-        <div className="form-field-group">
-          <label className="form-label">Fecha *</label>
-          {renderFormField('fecha', newRow.fecha, 
-            (value) => handleFieldChange('fecha', value),
-            { required: true }
-          )}
-        </div>
-
-        <div className="form-field-group">
-          <label className="form-label">Total *</label>
-          {renderFormField('total', newRow.total, 
-            (value) => handleFieldChange('total', value),
-            { required: true }
-          )}
-        </div>
-
-        <div className="form-field-group">
-          <label className="form-label">Estado</label>
-          {renderFormField('estado', newRow.estado, 
-            (value) => handleFieldChange('estado', value)
-          )}
-        </div>
-
-        <div className="form-field-group full-width">
-          <label className="form-label">Observaciones</label>
-          {renderFormField('observaciones', newRow.observaciones, 
-            (value) => handleFieldChange('observaciones', value)
-          )}
-        </div>
-      </div>
-
-      <div className="form-actions">
-        <button 
-          onClick={handleAddComprobante}
-          className="add-button"
-          disabled={loading || !newRow.id_tipo_comprobante || !newRow.id_cliente || !newRow.numero || !newRow.fecha || !newRow.total}
-        >
-          {loading ? '⏳ Creando...' : '💾 Crear Comprobante'}
-        </button>
-        <button 
-          onClick={() => {
-            setIsAccordionOpen(false);
-            setNewRow({});
-          }}
-          className="cancel-button"
-          disabled={loading}
-        >
-          ❌ Cancelar
-        </button>
-      </div>
-    </div>
-  );
-
-  if (!tableData || tableData.length === 0) {
-    return (
-      <div className="comprobante-crud">
-        <div className="no-data">
-          <div className="no-data-icon">📄</div>
-          <div>No hay comprobantes registrados</div>
-          <button 
-            className="add-first-btn"
-            onClick={() => setIsAccordionOpen(true)}
-            disabled={loading}
-          >
-            {loading ? 'Cargando...' : '+ Crear Primer Comprobante'}
-          </button>
-        </div>
-
-        <div className="add-row-accordion">
-          <div className={`accordion-header ${isAccordionOpen ? 'open' : ''}`} onClick={toggleAccordion}>
-            <div className="accordion-title">
-              <span className="accordion-icon">📄</span>
-              Nuevo Comprobante
-            </div>
-            <div className="accordion-arrow">{isAccordionOpen ? '▲' : '▼'}</div>
-          </div>
-
-          <div className={`accordion-content ${isAccordionOpen ? 'open' : ''}`}>
-            {renderAddForm()}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="comprobante-crud">
-      {/* Filtros */}
-      <div className="filters-section">
-        <h4>🔍 Filtros de Comprobantes</h4>
-        <div className="filter-fields">
-          <input
-            type="text"
-            placeholder="Buscar por número, cliente..."
-            value={filters.search}
-            onChange={(e) => setFilters({...filters, search: e.target.value})}
-            className="filter-input"
-          />
-          
-          <select 
-            value={filters.tipo}
-            onChange={(e) => setFilters({...filters, tipo: e.target.value})}
-            className="filter-input"
-          >
-            <option value="">Todos los tipos</option>
-            {tiposComprobante.map(tipo => (
-              <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
-            ))}
-          </select>
-          
-          <select 
-            value={filters.estado}
-            onChange={(e) => setFilters({...filters, estado: e.target.value})}
-            className="filter-input"
-          >
-            <option value="">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="completado">Completado</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
-          
-          <button 
-            onClick={() => window.location.reload()}
-            className="filter-button"
-          >
-            🔄 Actualizar
-          </button>
-        </div>
-      </div>
+      <div className={`accordion-content ${isAccordionOpen ? 'open' : ''}`}>
+        <div className="add-row-form scrollable">
+          <h3>📄 Nuevo Comprobante</h3>
 
-      {/* Estadísticas rápidas */}
-      <div className="comprobante-stats">
-        <div className="stat-card">
-          <div className="stat-title">Total Comprobantes</div>
-          <div className="stat-value">{tableData.length}</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-title">Monto Total</div>
-          <div className="stat-value income">
-            ${tableData.reduce((sum, comp) => sum + parseFloat(comp.total || 0), 0).toLocaleString('es-AR')}
+          <div className="form-fields grid-2">
+            <div>
+              <label>Tipo *</label>
+              {renderFormField('id_tipo_comprobante', safeNewRow.id_tipo_comprobante, handleTipoChange)}
+            </div>
+            <div>
+              <label>Cliente *</label>
+              {renderFormField('id_cliente', safeNewRow.id_cliente, (v) => handleFieldChange('id_cliente', v))}
+            </div>
+            <div>
+              <label>Número *</label>
+              {renderFormField('numero', safeNewRow.numero, (v) => handleFieldChange('numero', v), { disabled: true })}
+            </div>
+            <div>
+              <label>Fecha *</label>
+              {renderFormField('fecha', safeNewRow.fecha, (v) => handleFieldChange('fecha', v))}
+            </div>
+            <div>
+              <label>Total</label>
+              {renderFormField('total', safeNewRow.total, () => {}, { disabled: true })}
+            </div>
+            <div>
+              <label>Estado</label>
+              {renderFormField('estado', safeNewRow.estado, (v) => handleFieldChange('estado', v))}
+            </div>
+          </div>
+
+          <div className="form-field-group full-width">
+            <label>Observaciones</label>
+            {renderFormField('observaciones', safeNewRow.observaciones, (v) => handleFieldChange('observaciones', v))}
+          </div>
+
+          {/* 🧾 Ítems */}
+          <div className="items-section">
+            <h4>🧾 Detalle de artículos</h4>
+            <div className="item-form">
+              <select
+                value={newItem.id_articulo}
+                onChange={(e) => setNewItem({ ...newItem, id_articulo: e.target.value })}
+                className="form-input small"
+              >
+                <option value="">Seleccionar artículo</option>
+                {articulos.map((a) => (
+                  <option key={a.id} value={a.id}>{a.nombre}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                placeholder="Cantidad"
+                value={newItem.cantidad}
+                onChange={(e) => setNewItem({ ...newItem, cantidad: e.target.value })}
+                className="form-input small"
+              />
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Precio"
+                value={newItem.precio}
+                onChange={(e) => setNewItem({ ...newItem, precio: e.target.value })}
+                className="form-input small"
+              />
+              <button
+                onClick={() => {
+                  if (!newItem.id_articulo || !newItem.cantidad || !newItem.precio) return;
+                  const subtotal = parseFloat(newItem.cantidad) * parseFloat(newItem.precio);
+                  setItems([...items, { ...newItem, subtotal }]);
+                  setNewItem({ id_articulo: '', cantidad: '', precio: '' });
+                }}
+                className="add-item-btn"
+              >
+                ➕ Agregar
+              </button>
+            </div>
+
+            {items.length > 0 && (
+              <table className="items-table">
+                <thead>
+                  <tr>
+                    <th>Artículo</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Subtotal</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((i, idx) => (
+                    <tr key={idx}>
+                      <td>{articulos.find(a => a.id == i.id_articulo)?.nombre || '-'}</td>
+                      <td>{i.cantidad}</td>
+                      <td>${parseFloat(i.precio).toLocaleString('es-AR')}</td>
+                      <td>${i.subtotal.toLocaleString('es-AR')}</td>
+                      <td>
+                        <button
+                          className="delete-btn"
+                          onClick={() => setItems(items.filter((_, j) => j !== idx))}
+                        >
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          <div className="form-actions">
+            <button onClick={handleAddComprobante} className="add-button" disabled={loading}>
+              {loading ? '⏳ Creando...' : '💾 Crear Comprobante'}
+            </button>
+            <button
+              onClick={() => {
+                setIsAccordionOpen(false);
+                setNewRow({});
+                setItems([]);
+              }}
+              className="cancel-button"
+            >
+              ❌ Cancelar
+            </button>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-title">Pendientes</div>
-          <div className="stat-value pending">
-            {tableData.filter(comp => comp.estado === 'pendiente').length}
-          </div>
-        </div>
-      </div>
-
-      {/* Acordeón para nuevo comprobante */}
-      <div className="add-row-accordion">
-        <div className={`accordion-header ${isAccordionOpen ? 'open' : ''}`} onClick={toggleAccordion}>
-          <div className="accordion-title">
-            <span className="accordion-icon">📄</span>
-            Nuevo Comprobante
-          </div>
-          <div className="accordion-arrow">{isAccordionOpen ? '▲' : '▼'}</div>
-        </div>
-
-        <div className={`accordion-content ${isAccordionOpen ? 'open' : ''}`}>
-          {renderAddForm()}
-        </div>
-      </div>
-
-      {/* Tabla de comprobantes */}
-      <div className="table-container">
-        <table className="data-table comprobante-table">
-          <thead>
-            <tr>
-              <th>Número</th>
-              <th>Tipo</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tableData.map((comprobante) => (
-              <tr key={comprobante.id} className={`row-${comprobante.estado?.toLowerCase()}`}>
-                <td>
-                  <strong>{comprobante.numero}</strong>
-                </td>
-                <td>
-                  <span className="tipo-badge" title={comprobante.tipo_nombre}>
-                    {comprobante.tipo_codigo}
-                  </span>
-                </td>
-                <td>
-                  {comprobante.fecha ? new Date(comprobante.fecha).toLocaleDateString('es-AR') : '-'}
-                </td>
-                <td>
-                  {comprobante.cliente_nombre}
-                </td>
-                <td className="amount-cell">
-                  ${comprobante.total ? parseFloat(comprobante.total).toLocaleString('es-AR') : '0'}
-                </td>
-                <td>
-                  <span className={`status-badge status-${comprobante.estado?.toLowerCase()}`}>
-                    {comprobante.estado}
-                  </span>
-                </td>
-                <td className="actions">
-                  <button 
-                    onClick={() => {
-                      if (window.confirm('¿Estás seguro de eliminar este comprobante?')) {
-                        handleDeleteRow(comprobante.id);
-                      }
-                    }}
-                    className="delete-btn"
-                    title="Eliminar"
-                    disabled={loading}
-                  >
-                    🗑️
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );

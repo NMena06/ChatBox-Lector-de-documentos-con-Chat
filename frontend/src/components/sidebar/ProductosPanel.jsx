@@ -51,7 +51,7 @@ const ProductosPanel = ({ tables, selectedTable, loadTableData }) => {
       
       {/* Tablas principales */}
       <div className="tables-section">
-        <h4>📊 Tablas Principales</h4>
+        {/* <h4>📊 Tablas Principales</h4> */}
         <div className="tables-grid">
           {productosTables.map(table => (
             <div 

@@ -381,16 +381,16 @@ const ArticulosCRUD = ({
   };
 
   const handleSaveEdit = async (id, rowData) => {
-    try {
-      const updateData = {
-        ...rowData,
-        id_tipo_articulo: parseInt(rowData.id_tipo_articulo),
-        precio_compra: parseFloat(rowData.precio_compra || 0),
-        precio_venta: parseFloat(rowData.precio_venta || 0),
-        stock: parseInt(rowData.stock || 0),
-        stock_minimo: parseInt(rowData.stock_minimo || 0)
-      };
-
+ try {
+    // 🔥 Excluimos el campo ID para evitar el error de SQL
+    const { id: _, ...updateData } = {
+      ...rowData,
+      id_tipo_articulo: parseInt(rowData.id_tipo_articulo),
+      precio_compra: parseFloat(rowData.precio_compra || 0),
+      precio_venta: parseFloat(rowData.precio_venta || 0),
+      stock: parseInt(rowData.stock || 0),
+      stock_minimo: parseInt(rowData.stock_minimo || 0)
+    };
       const response = await fetch(`http://localhost:3001/api/tables/Articulos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -730,8 +730,8 @@ const ArticulosCRUD = ({
                       </button>
                       <button
                         onClick={() => {
-                          if (window.confirm('¿Estás seguro de eliminar este artículo?')) {
-                            handleDeleteRow(articulo.id);
+                           {
+                          handleDeleteRow(articulo.id);  
                           }
                         }}
                         className="delete-btn"

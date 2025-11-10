@@ -1,17 +1,16 @@
 import React from 'react';
 import './CategoryPanel.css';
 
-const VentasPanel = ({ tables, selectedTable, loadTableData }) => {
+const ComprobantesPanel = ({ tables, selectedTable, loadTableData }) => {
   const ventasTables = [
-    
-    { name: 'Clientes', icon: '👥', description: 'Gestión de clientes' }
+    { name: 'Comprobantes', icon: '🧾', description: 'Comprobantes de venta' }
   ];
 
   return (
     <div className="category-panel">
       <div className="category-header">
-        <h3>👥 Clientes</h3>
-        <p>Gestiar clientes</p>
+        <h3>📊 Ventas</h3>
+        <p>Gestión comercial</p>
       </div>
       
       <div className="tables-grid">
@@ -31,16 +30,16 @@ const VentasPanel = ({ tables, selectedTable, loadTableData }) => {
         ))}
       </div>
 
-      {/* <div className="quick-actions">
+      <div className="quick-actions">
         <button className="action-btn primary">
-          🎯 Nuevo Cliente
+          🎯 Nueva Venta
         </button>
         <button className="action-btn secondary">
-          📋 Ver Clientes
+          📋 Ver Comprobantes
         </button>
-      </div> */}
+      </div>
     </div>
   );
 };
 
-export default VentasPanel;
+export default  ComprobantesPanel;

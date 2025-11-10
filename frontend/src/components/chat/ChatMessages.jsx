@@ -1,5 +1,6 @@
 import React from 'react';
 import Message from './Message';
+import ComprobanteCRUD from '../tables/ComprobanteCRUD';
 import './ChatMessages.css';
 
 const ChatMessages = ({ 
@@ -33,20 +34,23 @@ const ChatMessages = ({
             </button>
           </div>
         </div>
-        
-{loading ? (
-  <div className="loading-table">
-    <div className="loading-spinner"></div>
-    Cargando datos de {selectedTable}...
-  </div>
-) : (
-  TableCRUD?.()
-)}
 
+        {loading ? (
+          <div className="loading-table">
+            <div className="loading-spinner"></div>
+            Cargando datos de {selectedTable}...
+          </div>
+        ) : (
+          <div className="table-crud-container">
+            {/* 🔥 Renderiza directamente el TableCRUD que viene con todas las props */}
+            {TableCRUD && TableCRUD()}
+          </div>
+        )}
       </div>
     );
   }
 
+  // 🧠 Vista del chat normal
   return (
     <>
       {chat.length === 0 && (

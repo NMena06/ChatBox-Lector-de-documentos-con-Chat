@@ -7,6 +7,7 @@ import ChatInput from './components/chat/ChatInput';
 import TableCRUD from './components/tables/TableCRUD';
 import AccountingCRUD from './components/tables/AccountingCRUD';
 import ArticulosCRUD from './components/tables/ArticulosCRUD';
+import ComprobanteCRUD from './components/tables/ComprobanteCRUD';
 import { useChat } from './hooks/useChat';
 import { useTables } from './hooks/useTables';
 import { useConversations } from './hooks/useConversations';
@@ -73,17 +74,19 @@ export default function App() {
 
   // Función para determinar qué CRUD usar
 // En la función renderTableCRUD de App.js
+// En App.js - función renderTableCRUD actualizada
 const renderTableCRUD = () => {
-  const accountingTables = ['Transacciones', 'Balances', 'Comprobantes'];
+  const accountingTables = ['Transacciones', 'Balances'];
+  const comprobantesTables = ['Comprobantes'];
   const articulosTables = ['Articulos', 'TipoArticulo'];
-  
+
   const crudProps = {
     tableData: tables.tableData,
-    setTableData: tables.setTableData, // 🔥 AÑADIR ESTO
+    setTableData: tables.setTableData,
     editingRow: tables.editingRow,
     setEditingRow: tables.setEditingRow,
     newRow: tables.newRow,
-    setNewRow: tables.setNewRow,
+    setNewRow: tables.setNewRow, // 🔥 Asegúrate de que esto esté incluido
     handleAddRow: tables.handleAddRow,
     handleUpdateRow: tables.handleUpdateRow,
     handleDeleteRow: tables.handleDeleteRow,
@@ -91,7 +94,9 @@ const renderTableCRUD = () => {
     setIsAccordionOpen
   };
 
-  if (accountingTables.includes(tables.selectedTable)) {
+  if (comprobantesTables.includes(tables.selectedTable)) {
+    return <ComprobanteCRUD {...crudProps} />;
+  } else if (accountingTables.includes(tables.selectedTable)) {
     return <AccountingCRUD {...crudProps} selectedTable={tables.selectedTable} />;
   } else if (tables.selectedTable === 'Articulos') {
     return <ArticulosCRUD {...crudProps} />;

@@ -28,7 +28,25 @@
 
 .accordion-content.open {
   display: block;
+  max-height: 400px; /* 🔢 ajustá según el alto que quieras visible */
   padding: 1.5rem;
+  overflow-y: auto; /* 🔥 activa el scroll vertical */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #aaa transparent; /* Firefox */
+}
+
+/* 💅 Scrollbar estilizado (para Chrome, Edge y Safari) */
+.accordion-content.open::-webkit-scrollbar {
+  width: 8px;
+}
+
+.accordion-content.open::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  border-radius: 10px;
+}
+
+.accordion-content.open::-webkit-scrollbar-thumb:hover {
+  background-color: #888;
 }
 
 .add-row-form {

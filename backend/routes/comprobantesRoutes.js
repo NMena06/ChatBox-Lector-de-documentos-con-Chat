@@ -14,4 +14,18 @@ router.delete('/comprobantes/:id', comprobanteController.deleteComprobante);
 // Estadísticas
 router.get('/comprobantes/estadisticas', comprobanteController.getEstadisticas);
 router.get('/comprobantes/proximo-numero/:tipoId', comprobanteController.getProximoNumero);
+
+
+// ✅ Nueva ruta: obtener tipos de comprobantes
+router.get('/tipos', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query('SELECT id, nombre FROM TipoComprobante');
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('Error al obtener tipos de comprobantes:', err);
+    res.status(500).json({ error: 'Error al obtener tipos de comprobantes' });
+  }
+});
+
 module.exports = router;

@@ -2,6 +2,7 @@ import React from 'react';
 import SidebarNavigation from './SidebarNavigation';
 import ProductosPanel from './ProductosPanel';
 import ContabilidadPanel from './ContabilidadPanel';
+import  ComprobantesPanel from './ComprobantesPanel';
 import VentasPanel from './VentasPanel';
 import ScriptsPanel from './ScriptsPanel';
 import HelpPanel from './HelpPanel';
@@ -62,7 +63,7 @@ const Sidebar = ({
         )}
         
         {activeSidebarTab === 'ventas' && (
-          <VentasPanel 
+          <ComprobantesPanel 
             tables={tables}
             selectedTable={selectedTable}
             loadTableData={loadTableData}

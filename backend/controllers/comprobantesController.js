@@ -24,7 +24,50 @@ class ComprobanteController {
       });
     }
   }
+async getComprobanteById(req, res) {
+    try {
+      const { id } = req.params;
 
+      const comprobanteQuery = `
+        SELECT 
+          C.*, 
+          T.nombre as tipo_nombre,
+          CL.nombre as cliente_nombre
+        FROM Comprobantes C
+        LEFT JOIN TipoComprobante T ON C.id_tipo_comprobante = T.id
+        LEFT JOIN Clientes CL ON C.id_cliente = CL.id
+        WHERE C.id = @id
+      `;
+      const detalleQuery = `
+        SELECT 
+          D.*, A.nombre as articulo_nombre
+        FROM ComprobanteDetalle D
+        LEFT JOIN Articulos A ON D.id_articulo = A.id
+        WHERE D.id_comprobante = @id
+      `;
+
+      const [comp, det] = await Promise.all([
+        dbService.executeQuery(comprobanteQuery, { id: parseInt(id) }),
+        dbService.executeQuery(detalleQuery, { id: parseInt(id) })
+      ]);
+
+      if (comp.data.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'Comprobante no encontrado'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: { ...comp.data[0], items: det.data }
+      });
+
+    } catch (error) {
+      console.error('❌ Error obteniendo comprobante:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  }
   // 🔍 Obtener comprobantes con joins
   async getComprobantes(req, res) {
     try {
@@ -97,8 +140,9 @@ class ComprobanteController {
     }
   }
 
-  // ➕ Crear comprobante
+  // 🧾 Crear comprobante con detalle
   async createComprobante(req, res) {
+    const transaction = await dbService.getTransaction();
     try {
       const {
         id_tipo_comprobante,
@@ -107,34 +151,23 @@ class ComprobanteController {
         fecha,
         total,
         estado = 'Pendiente',
-        observaciones = ''
+        observaciones = '',
+        items = []
       } = req.body;
 
-      // Validaciones básicas
       if (!id_tipo_comprobante || !numero || !fecha || total === undefined) {
-        return res.status(400).json({ 
-          success: false, 
-          error: 'Faltan campos obligatorios: tipo de comprobante, número, fecha y total' 
-        });
-      }
-
-      // Verificar si el número ya existe
-      const existeQuery = `SELECT id FROM Comprobantes WHERE numero = @numero`;
-      const existeResult = await dbService.executeQuery(existeQuery, { numero });
-      
-      if (existeResult.data.length > 0) {
         return res.status(400).json({
           success: false,
-          error: 'Ya existe un comprobante con ese número'
+          error: 'Faltan campos obligatorios: tipo, número, fecha y total'
         });
       }
 
-      // Generar query de inserción
-      const query = `
+      // Insertar comprobante principal
+      const insertQuery = `
         INSERT INTO Comprobantes (
           id_tipo_comprobante, id_cliente, numero, fecha, total, estado, observaciones
         )
-        OUTPUT INSERTED.*
+        OUTPUT INSERTED.id
         VALUES (@id_tipo_comprobante, @id_cliente, @numero, @fecha, @total, @estado, @observaciones)
       `;
 
@@ -144,23 +177,46 @@ class ComprobanteController {
         numero: numero.toString(),
         fecha: fecha,
         total: parseFloat(total),
-        estado: estado,
-        observaciones: observaciones
+        estado,
+        observaciones
       };
 
-      const result = await dbService.executeQuery(query, params);
+      const result = await dbService.executeQuery(insertQuery, params, transaction);
+      const comprobanteId = result.data[0].id;
+
+      // Insertar ítems del detalle
+      for (const item of items) {
+        const itemQuery = `
+          INSERT INTO ComprobanteDetalle (
+            id_comprobante, id_articulo, cantidad, precio_unitario, descuento, iva
+          )
+          VALUES (@id_comprobante, @id_articulo, @cantidad, @precio_unitario, @descuento, @iva)
+        `;
+        const itemParams = {
+          id_comprobante: comprobanteId,
+          id_articulo: parseInt(item.id_articulo),
+          cantidad: parseFloat(item.cantidad),
+          precio_unitario: parseFloat(item.precio),
+          descuento: parseFloat(item.descuento || 0),
+          iva: parseFloat(item.iva || 21)
+        };
+        await dbService.executeQuery(itemQuery, itemParams, transaction);
+      }
+
+      await transaction.commit();
 
       res.json({
         success: true,
-        data: result.data[0],
-        message: 'Comprobante creado correctamente'
+        message: 'Comprobante y detalle guardados correctamente',
+        data: { id: comprobanteId }
       });
 
     } catch (error) {
-      console.error('❌ Error creando comprobante:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: error.message 
+      await transaction.rollback();
+      console.error('❌ Error creando comprobante con detalle:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message
       });
     }
   }
@@ -235,30 +291,24 @@ class ComprobanteController {
   async deleteComprobante(req, res) {
     try {
       const { id } = req.params;
-
       const query = 'DELETE FROM Comprobantes WHERE id = @id';
       const result = await dbService.executeQuery(query, { id: parseInt(id) });
 
       if (result.rowsAffected === 0) {
-        return res.status(404).json({ 
-          success: false, 
-          error: 'Comprobante no encontrado' 
+        return res.status(404).json({
+          success: false,
+          error: 'Comprobante no encontrado'
         });
       }
 
-      res.json({
-        success: true,
-        message: 'Comprobante eliminado correctamente'
-      });
+      res.json({ success: true, message: 'Comprobante eliminado correctamente' });
 
     } catch (error) {
       console.error('❌ Error eliminando comprobante:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: error.message 
-      });
+      res.status(500).json({ success: false, error: error.message });
     }
   }
+
 
   // 📊 Obtener estadísticas
   async getEstadisticas(req, res) {

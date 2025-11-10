@@ -8,21 +8,23 @@ const SidebarNavigation = ({ activeSidebarTab, setActiveSidebarTab }) => {
       name: 'Productos',
       icon: '🛍️'
     },
-    {
-      id: 'contabilidad', 
-      name: 'Contabilidad',
-      icon: '💰'
+        {
+      id: 'clientes',
+      name: 'Clientes', 
+      icon: '👥'
     },
-    {
+        {
       id: 'ventas',
       name: 'Ventas',
       icon: '📊'
     },
     {
-      id: 'clientes',
-      name: 'Clientes', 
-      icon: '👥'
+      id: 'contabilidad', 
+      name: 'Contabilidad',
+      icon: '💰'
     },
+
+
     {
       id: 'scripts',
       name: 'Scripts',
