@@ -34,14 +34,15 @@ const ChatMessages = ({
           </div>
         </div>
         
-        {loading ? (
-          <div className="loading-table">
-            <div className="loading-spinner"></div>
-            Cargando datos de {selectedTable}...
-          </div>
-        ) : (
-          <TableCRUD />
-        )}
+{loading ? (
+  <div className="loading-table">
+    <div className="loading-spinner"></div>
+    Cargando datos de {selectedTable}...
+  </div>
+) : (
+  TableCRUD?.()
+)}
+
       </div>
     );
   }

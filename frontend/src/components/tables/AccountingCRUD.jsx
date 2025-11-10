@@ -3,17 +3,19 @@ import Swal from 'sweetalert2';
 import './TableCRUD.css';
 
 const AccountingCRUD = ({ 
-  tableData, 
-  editingRow, 
-  setEditingRow, 
-  newRow, 
-  setNewRow, 
-  handleAddRow, 
-  handleUpdateRow, 
+tableData,
+  editingRow,
+  setEditingRow,
+  newRow,
+  setNewRow,
+  handleAddRow,
+  handleUpdateRow,
   handleDeleteRow,
+  isAccordionOpen,
+  setIsAccordionOpen,
   selectedTable 
 }) => {
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  
   const [filters, setFilters] = useState({});
   const [loading, setLoading] = useState(false);
 
@@ -287,7 +289,12 @@ const AccountingCRUD = ({
 
   // Renderizar el formulario de creación
   const renderAddForm = () => (
-    <div className="add-row-form" onClick={(e) => e.stopPropagation()}>
+    <div
+  className="add-row-form"
+  onClick={(e) => e.stopPropagation()}
+  onKeyDown={(e) => e.stopPropagation()}
+>
+
       <div className="form-fields">
         {config.formFields.map(column => (
           <div key={column} className="form-field-group">
@@ -326,7 +333,7 @@ const AccountingCRUD = ({
   if (!tableData || tableData.length === 0) {
     return (
       <div className="accounting-crud">
-        <div className="no-data">
+        {/* <div className="no-data">
           <div className="no-data-icon">💼</div>
           <div>No hay datos en {selectedTable}</div>
           <button 
@@ -336,7 +343,7 @@ const AccountingCRUD = ({
           >
             {loading ? 'Cargando...' : '+ Agregar Primer Registro'}
           </button>
-        </div>
+        </div> */}
 
         {/* Acordeón para agregar nuevo registro */}
         <div className="add-row-accordion">
@@ -507,7 +514,8 @@ const AccountingCRUD = ({
       </div>
 
       {/* Tabla de datos */}
-      <div className="table-container">
+      <div className={`table-container ${isAccordionOpen ? 'behind' : ''}`}>
+
         <table className="data-table accounting-table">
           <thead>
             <tr>
@@ -548,9 +556,9 @@ const AccountingCRUD = ({
           </tbody>
         </table>
 
-        {config.columns.length > 6 && (
+        {/* {config.columns.length > 6 && (
           <div className="scroll-hint">← Desplázate →</div>
-        )}
+        )} */}
       </div>
     </div>
   );

@@ -6,13 +6,16 @@ import ChatMessages from './components/chat/ChatMessages';
 import ChatInput from './components/chat/ChatInput';
 import TableCRUD from './components/tables/TableCRUD';
 import AccountingCRUD from './components/tables/AccountingCRUD';
+import ArticulosCRUD from './components/tables/ArticulosCRUD';
 import { useChat } from './hooks/useChat';
 import { useTables } from './hooks/useTables';
 import { useConversations } from './hooks/useConversations';
-
+import TipoArticuloCRUD from './components/tables/TipoArticuloCRUD';
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSidebarTab, setActiveSidebarTab] = useState('productos');
+  // 🔥 Nuevo estado para mantener el acordeón abierto incluso al escribir
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
   // Usar hooks personalizados
   const chat = useChat();
@@ -69,38 +72,35 @@ export default function App() {
   };
 
   // Función para determinar qué CRUD usar
-  const renderTableCRUD = () => {
-    const accountingTables = ['Transacciones', 'Balances', 'Comprobantes'];
-    
-    if (accountingTables.includes(tables.selectedTable)) {
-      return (
-        <AccountingCRUD 
-          tableData={tables.tableData}
-          editingRow={tables.editingRow}
-          setEditingRow={tables.setEditingRow}
-          newRow={tables.newRow}
-          setNewRow={tables.setNewRow}
-          handleAddRow={tables.handleAddRow}
-          handleUpdateRow={tables.handleUpdateRow}
-          handleDeleteRow={tables.handleDeleteRow}
-          selectedTable={tables.selectedTable}
-        />
-      );
-    } else {
-      return (
-        <TableCRUD 
-          tableData={tables.tableData}
-          editingRow={tables.editingRow}
-          setEditingRow={tables.setEditingRow}
-          newRow={tables.newRow}
-          setNewRow={tables.setNewRow}
-          handleAddRow={tables.handleAddRow}
-          handleUpdateRow={tables.handleUpdateRow}
-          handleDeleteRow={tables.handleDeleteRow}
-        />
-      );
-    }
+// En la función renderTableCRUD de App.js
+const renderTableCRUD = () => {
+  const accountingTables = ['Transacciones', 'Balances', 'Comprobantes'];
+  const articulosTables = ['Articulos', 'TipoArticulo'];
+  
+  const crudProps = {
+    tableData: tables.tableData,
+    setTableData: tables.setTableData, // 🔥 AÑADIR ESTO
+    editingRow: tables.editingRow,
+    setEditingRow: tables.setEditingRow,
+    newRow: tables.newRow,
+    setNewRow: tables.setNewRow,
+    handleAddRow: tables.handleAddRow,
+    handleUpdateRow: tables.handleUpdateRow,
+    handleDeleteRow: tables.handleDeleteRow,
+    isAccordionOpen,
+    setIsAccordionOpen
   };
+
+  if (accountingTables.includes(tables.selectedTable)) {
+    return <AccountingCRUD {...crudProps} selectedTable={tables.selectedTable} />;
+  } else if (tables.selectedTable === 'Articulos') {
+    return <ArticulosCRUD {...crudProps} />;
+  } else if (tables.selectedTable === 'TipoArticulo') {
+    return <TipoArticuloCRUD {...crudProps} />;
+  } else {
+    return <TableCRUD {...crudProps} />;
+  }
+};
 
   return (
     <div className="app-container">

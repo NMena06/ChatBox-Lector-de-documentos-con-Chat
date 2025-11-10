@@ -26,7 +26,7 @@
 }
 
 .nav-btn.active {
-  background: #3498db;
+  background: #34495e;
   color: white;
   box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }

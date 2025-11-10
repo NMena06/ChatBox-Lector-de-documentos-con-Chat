@@ -11,7 +11,7 @@
 
 .chat-container {
   width: 100%;
-  max-width: 900px;
+  /* max-width: 900px; */
   height: 92vh;
   max-height: 780px;
   background: white;
@@ -182,7 +182,7 @@
 }
 
 .refresh-button {
-  background: #3498db;
+  background: #34495e;
   color: white;
 }
 
@@ -221,7 +221,7 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #3498db;
+  border-top: 4px solid #34495e;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 15px;
@@ -236,7 +236,7 @@
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 0;
+  padding: 1rem
 }
 
 /* Cuando se muestran tablas, el chat-messages debe ocupar todo el espacio */

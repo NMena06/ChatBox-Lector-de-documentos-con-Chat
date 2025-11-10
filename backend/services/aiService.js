@@ -174,26 +174,30 @@ IMPORTANTE: Responde ÚNICAMENTE con el JSON válido, sin texto adicional, sin c
     return { action: "none" };
   }
 
-  detectTable(query) {
-    const tableMap = {
-      'cliente': 'Clientes',
-      'moto': 'Motos', 
-      'accesorio': 'Accesorios',
-      'casco': 'Cascos',
-      'bicicleta': 'Bicicletas',
-      'indumentaria': 'Indumentarias',
-      'comprobante': 'Comprobantes',
-      'lista': 'ListaPrecios',
-      'precio': 'ListaPrecios'
-    };
+detectTable(query) {
+  const tableMap = {
+    'cliente': 'Clientes',
+    'articulo': 'Articulos',
+    'tipo articulo': 'TipoArticulo',
+    'moto': 'Articulos',
+    'bicicleta': 'Articulos', 
+    'casco': 'Articulos',
+    'accesorio': 'Articulos',
+    'indumentaria': 'Articulos',
+    'comprobante': 'Comprobantes',
+    'lista': 'ListaPrecios',
+    'precio': 'ListaPrecios',
+    'transaccion': 'Transacciones',
+    'balance': 'Balances'
+  };
 
-    for (const [keyword, table] of Object.entries(tableMap)) {
-      if (query.includes(keyword)) {
-        return table;
-      }
+  for (const [keyword, table] of Object.entries(tableMap)) {
+    if (query.includes(keyword)) {
+      return table;
     }
-    return null;
   }
+  return null;
+}
 
   async webSearch(query) {
     const prompt = `El usuario quiere buscar información actualizada sobre: "${query}"

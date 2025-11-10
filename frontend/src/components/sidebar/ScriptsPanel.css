@@ -27,7 +27,7 @@
 }
 
 .table-badge {
-  background: #3498db;
+  background: #34495e;
   color: white;
   padding: 4px 8px;
   border-radius: 12px;
@@ -56,14 +56,14 @@
 }
 
 .category-tab:hover {
-  border-color: #3498db;
+  border-color: #34495e;
   background: #f8f9fa;
 }
 
 .category-tab.active {
-  background: #3498db;
+  background: #34495e;
   color: white;
-  border-color: #3498db;
+  border-color: #34495e;
 }
 
 .category-icon {
@@ -93,7 +93,7 @@
 }
 
 .script-item:hover {
-  border-color: #3498db;
+  border-color: #34495e;
   box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
   transform: translateY(-1px);
 }

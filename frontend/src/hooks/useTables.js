@@ -193,6 +193,7 @@ const goBackToChat = () => {
   return {
     tables,
     selectedTable,
+    setTableData,
     tableData,
     showTables,
     setShowTables,

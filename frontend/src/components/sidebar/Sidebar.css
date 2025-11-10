@@ -45,7 +45,7 @@
   padding: 0.5rem;
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
-  display: none;
+  /* display: none; */
 }
 
 .sidebar-close:hover {
@@ -56,7 +56,7 @@
 
 .sidebar-content {
   flex: 1;
-  padding: 1.5rem;
+  /* padding: 1.5rem; */
   overflow-y: auto;
   display: flex;
   flex-direction: column;

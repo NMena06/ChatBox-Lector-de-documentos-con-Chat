@@ -6,6 +6,8 @@ const cors = require('cors');
 // Importar rutas
 const chatRoutes = require('./routes/chatRoutes');
 const crudRoutes = require('./routes/crudRoutes');
+const articulosRoutes = require('./routes/articulos'); // 🔥 NUEVA RUTA
+const accountingRoutes = require('./routes/accountingRoutes'); // Si tienes rutas de contabilidad
 
 // Importar servicios para inicialización
 const { Database } = require('./config/database');
@@ -20,6 +22,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Rutas
 app.use('/api', chatRoutes);
 app.use('/api', crudRoutes);
+app.use('/api', articulosRoutes); // 🔥 AGREGAR ESTA LÍNEA
+// app.use('/api', accountingRoutes); // Si tienes contabilidad
 
 // Health check
 app.get('/health', (req, res) => {
@@ -40,7 +44,9 @@ app.get('/', (req, res) => {
       history: 'GET /api/history/:conversationId',
       tables: 'GET /api/tables',
       tableData: 'GET /api/tables/:tableName',
-      schema: 'GET /api/schema'
+      schema: 'GET /api/schema',
+      articulos: 'GET /api/articulos/tipos', // 🔥 NUEVO ENDPOINT
+      tiposArticulo: 'GET /api/articulos/tipos' // 🔥 NUEVO ENDPOINT
     }
   });
 });
@@ -76,6 +82,7 @@ async function startServer() {
       console.log(`🚀 Servidor ejecutándose en puerto ${PORT}`);
       console.log(`📊 Entorno: ${process.env.NODE_ENV || 'development'}`);
       console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+      console.log(`📦 Endpoint artículos: http://localhost:${PORT}/api/articulos/tipos`); // 🔥 NUEVO LOG
     });
   } catch (error) {
     console.error('❌ Error iniciando servidor:', error);
@@ -99,7 +106,6 @@ process.on('SIGTERM', async () => {
 startServer();
 
 module.exports = app;
-
 // require('dotenv').config();
 // const express = require('express');
 // const bodyParser = require('body-parser');

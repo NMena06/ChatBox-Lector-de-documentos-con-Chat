@@ -57,6 +57,78 @@ class DBService {
       return {};
     }
   }
+  // Obtener tipos de artículo
+  async getTiposArticulo() {
+    try {
+      const result = await this.executeQuery(`
+        SELECT id, nombre, descripcion, activo 
+        FROM TipoArticulo 
+        WHERE activo = 1 
+        ORDER BY nombre
+      `);
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Obtener artículos con joins
+  async getArticulos(filters = {}) {
+    try {
+      let whereConditions = ['A.activo = 1'];
+      let params = {};
+
+      if (filters.search) {
+        whereConditions.push('(A.nombre LIKE @search OR A.marca LIKE @search OR A.descripcion LIKE @search)');
+        params.search = `%${filters.search}%`;
+      }
+
+      if (filters.tipo) {
+        whereConditions.push('A.id_tipo_articulo = @tipo');
+        params.tipo = parseInt(filters.tipo);
+      }
+
+      if (filters.categoria) {
+        whereConditions.push('A.categoria LIKE @categoria');
+        params.categoria = `%${filters.categoria}%`;
+      }
+
+      const whereClause = whereConditions.join(' AND ');
+
+      const query = `
+        SELECT 
+          A.*,
+          TA.nombre as tipo_nombre,
+          TA.descripcion as tipo_descripcion
+        FROM Articulos A
+        INNER JOIN TipoArticulo TA ON A.id_tipo_articulo = TA.id
+        WHERE ${whereClause}
+        ORDER BY A.nombre
+      `;
+
+      return await this.executeQuery(query, params);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // Crear nuevo tipo de artículo
+  async createTipoArticulo(data) {
+    try {
+      const { nombre, descripcion } = data;
+      
+      const query = `
+        INSERT INTO TipoArticulo (nombre, descripcion)
+        OUTPUT INSERTED.*
+        VALUES (@nombre, @descripcion)
+      `;
+
+      return await this.executeQuery(query, { nombre, descripcion });
+    } catch (error) {
+      throw error;
+    }
+  }
+
 
   async executeQuery(query, params = {}) {
     try {

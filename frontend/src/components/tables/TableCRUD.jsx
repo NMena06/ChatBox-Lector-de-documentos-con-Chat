@@ -1,18 +1,19 @@
 import React, { useState, useCallback } from 'react';
 import './TableCRUD.css';
 
-const TableCRUD = ({ 
-  tableData, 
-  editingRow, 
-  setEditingRow, 
-  newRow, 
-  setNewRow, 
-  handleAddRow, 
-  handleUpdateRow, 
-  handleDeleteRow 
+const TableCRUD = ({
+tableData,
+  editingRow,
+  setEditingRow,
+  newRow,
+  setNewRow,
+  handleAddRow,
+  handleUpdateRow,
+  handleDeleteRow,
+  isAccordionOpen,
+  setIsAccordionOpen
 }) => {
-  // 🔒 El estado del acordeón vive acá, fuera del render de inputs
-  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+
 
   // 🔁 Evitamos que el acordeón se cierre por re-render
   const toggleAccordion = useCallback(() => {
@@ -34,7 +35,7 @@ const TableCRUD = ({
     <div className="table-crud">
       {/* 🧱 Acordeón para agregar nuevo registro */}
       <div className="add-row-accordion">
-        <div 
+        <div
           className={`accordion-header ${isAccordionOpen ? 'open' : ''}`}
           onClick={toggleAccordion}
         >
@@ -48,7 +49,11 @@ const TableCRUD = ({
         </div>
 
         <div className={`accordion-content ${isAccordionOpen ? 'open' : ''}`}>
-          <div className="add-row-form" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="add-row-form"
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+          >
             <div className="form-fields">
               {columns
                 .filter(col => col !== 'id' && !col.includes('fecha'))
@@ -58,16 +63,18 @@ const TableCRUD = ({
                     type="text"
                     placeholder={column.replace(/_/g, ' ')}
                     value={newRow[column] || ''}
-                    onChange={(e) => setNewRow({ ...newRow, [column]: e.target.value })}
+                    onChange={(e) =>
+                      setNewRow({ ...newRow, [column]: e.target.value })
+                    }
                     className="form-input"
                   />
-              ))}
+                ))}
             </div>
             <div className="form-actions">
-              <button 
+              <button
                 onClick={() => {
                   handleAddRow();
-                  setIsAccordionOpen(false); // cerrar después de guardar
+                  setIsAccordionOpen(false);
                 }}
                 className="add-button"
                 disabled={
@@ -77,7 +84,7 @@ const TableCRUD = ({
               >
                 Agregar Registro
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setIsAccordionOpen(false);
                   setNewRow({});
@@ -89,10 +96,12 @@ const TableCRUD = ({
             </div>
           </div>
         </div>
+
       </div>
 
       {/* 📋 Tabla de datos */}
-      <div className="table-container">
+      <div className={`table-container ${isAccordionOpen ? 'behind' : ''}`}>
+
         <table className="data-table">
           <thead>
             <tr>
@@ -114,7 +123,7 @@ const TableCRUD = ({
                         type="text"
                         value={row[column] || ''}
                         onChange={(e) => {
-                          const updated = tableData.map(item => 
+                          const updated = tableData.map(item =>
                             item.id === row.id
                               ? { ...item, [column]: e.target.value }
                               : item
@@ -134,14 +143,14 @@ const TableCRUD = ({
                 <td className="actions">
                   {editingRow === row.id ? (
                     <>
-                      <button 
+                      <button
                         onClick={() => handleUpdateRow(row.id, row)}
                         className="save-btn"
                         title="Guardar"
                       >
                         💾
                       </button>
-                      <button 
+                      <button
                         onClick={() => setEditingRow(null)}
                         className="cancel-btn"
                         title="Cancelar"
@@ -151,14 +160,14 @@ const TableCRUD = ({
                     </>
                   ) : (
                     <>
-                      <button 
+                      <button
                         onClick={() => setEditingRow(row.id)}
                         className="edit-btn"
                         title="Editar"
                       >
                         ✏️
                       </button>
-                      <button 
+                      <button
                         onClick={() => {
                           if (window.confirm('¿Estás seguro de que querés eliminar este registro?')) {
                             handleDeleteRow(row.id);
@@ -177,10 +186,10 @@ const TableCRUD = ({
           </tbody>
         </table>
 
-        {/* ↔ Indicador de scroll */}
+        {/* ↔ Indicador de scroll
         {columns.length > 6 && (
           <div className="scroll-hint">← Desplázate →</div>
-        )}
+        )} */}
       </div>
     </div>
   );

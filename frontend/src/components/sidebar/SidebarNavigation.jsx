@@ -27,11 +27,6 @@ const SidebarNavigation = ({ activeSidebarTab, setActiveSidebarTab }) => {
       id: 'scripts',
       name: 'Scripts',
       icon: '⚡'
-    },
-    {
-      id: 'help',
-      name: 'Ayuda',
-      icon: '💡'
     }
   ];
 
