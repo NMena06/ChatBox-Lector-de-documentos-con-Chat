@@ -1,52 +1,52 @@
 .add-row-accordion {
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
   margin-bottom: 1rem;
-  background: #fafafa;
+  background: white;
   overflow: visible;
 }
 
 .accordion-header {
-  padding: 1rem;
-  background: #f5f5f5;
+  padding: 1rem 1.25rem;
+  background: var(--gray-50);
   cursor: pointer;
   user-select: none;
-  border-radius: 8px 8px 0 0;
-  transition: background 0.3s ease;
+  border-radius: var(--radius-lg);
+  transition: background var(--transition-fast);
+  border: none;
 }
 
 .accordion-header:hover {
-  background: #e9e9e9;
+  background: var(--gray-100);
 }
 
 .accordion-content {
   display: none;
   background: white;
-  border-top: 1px solid #ddd;
-  border-radius: 0 0 8px 8px;
+  border-top: 1px solid var(--gray-200);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .accordion-content.open {
   display: block;
-  max-height: 400px; /* 🔢 ajustá según el alto que quieras visible */
-  padding: 1.5rem;
-  overflow-y: auto; /* 🔥 activa el scroll vertical */
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #aaa transparent; /* Firefox */
+  max-height: 400px;
+  padding: 1.25rem;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gray-300) transparent;
 }
 
-/* 💅 Scrollbar estilizado (para Chrome, Edge y Safari) */
 .accordion-content.open::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .accordion-content.open::-webkit-scrollbar-thumb {
-  background-color: #bbb;
-  border-radius: 10px;
+  background-color: var(--gray-300);
+  border-radius: 3px;
 }
 
 .accordion-content.open::-webkit-scrollbar-thumb:hover {
-  background-color: #888;
+  background-color: var(--gray-400);
 }
 
 .add-row-form {
@@ -63,10 +63,17 @@
 
 .form-fields input {
   flex: 1;
-  padding: 0.6rem 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  background: white;
+  transition: border-color var(--transition-fast);
+}
+
+.form-fields input:focus {
+  outline: none;
+  border-color: var(--gray-900);
 }
 
 .form-buttons {
@@ -74,15 +81,17 @@
 }
 
 .form-buttons button {
-  background: #007bff;
+  background: var(--gray-900);
   color: white;
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background var(--transition-fast);
 }
 
 .form-buttons button:hover {
-  background: #0056b3;
+  background: var(--gray-800);
 }

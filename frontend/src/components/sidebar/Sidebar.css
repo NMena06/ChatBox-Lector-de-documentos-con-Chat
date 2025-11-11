@@ -1,8 +1,8 @@
-/* ===== SIDEBAR MEJORADO ===== */
+/* ===== SIDEBAR MINIMALISTA ===== */
 .sidebar {
-  width: 350px;
-  background: var(--gray-800);
-  border-right: 1px solid var(--gray-700);
+  width: 300px;
+  background: white;
+  border-right: 1px solid var(--gray-200);
   display: flex;
   flex-direction: column;
   transform: translateX(-100%);
@@ -12,7 +12,7 @@
   top: 0;
   height: 100vh;
   z-index: 1000;
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-lg);
 }
 
 .sidebar-open {
@@ -21,63 +21,58 @@
 
 .sidebar-header {
   padding: 1.5rem;
-  border-bottom: 1px solid var(--gray-700);
+  border-bottom: 1px solid var(--gray-200);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: var(--gray-900);
+  background: white;
 }
 
 .sidebar-header h2 {
-  color: white;
-  font-size: 1.25rem;
+  color: var(--gray-900);
+  font-size: 1.125rem;
   margin: 0;
   font-weight: 600;
-  letter-spacing: -0.025em;
 }
 
 .sidebar-close {
   background: none;
   border: none;
-  color: var(--gray-400);
-  font-size: 1.25rem;
+  color: var(--gray-500);
+  font-size: 1.125rem;
   cursor: pointer;
   padding: 0.5rem;
   border-radius: var(--radius-md);
   transition: all var(--transition-fast);
-  /* display: none; */
 }
 
 .sidebar-close:hover {
-  background: var(--gray-700);
-  color: white;
-  transform: scale(1.1);
+  background: var(--gray-100);
+  color: var(--gray-700);
 }
 
 .sidebar-content {
   flex: 1;
-  /* padding: 1.5rem; */
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 /* ===== SCROLLBARS SIDEBAR ===== */
 .sidebar-content::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 
 .sidebar-content::-webkit-scrollbar-track {
-  background: var(--gray-800);
-  border-radius: 3px;
+  background: var(--gray-100);
 }
 
 .sidebar-content::-webkit-scrollbar-thumb {
-  background: var(--gray-600);
-  border-radius: 3px;
+  background: var(--gray-300);
+  border-radius: 2px;
 }
 
 .sidebar-content::-webkit-scrollbar-thumb:hover {
-  background: var(--gray-500);
+  background: var(--gray-400);
 }

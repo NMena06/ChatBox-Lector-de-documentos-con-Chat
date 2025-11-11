@@ -1,38 +1,36 @@
 .sidebar-navigation {
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 10px;
+  gap: 0.25rem;
+  padding: 1rem;
 }
 
 .nav-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 15px;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
   border: none;
-  border-radius: 8px;
-  background: #f8f9fa;
+  border-radius: var(--radius-md);
+  background: transparent;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--transition-fast);
   text-align: left;
-  font-size: 0.9em;
-  color: #2c3e50;
+  font-size: 0.875rem;
+  color: var(--gray-700);
 }
 
 .nav-btn:hover {
-  background: #e9ecef;
-  transform: translateX(5px);
+  background: var(--gray-100);
 }
 
 .nav-btn.active {
-  background: #34495e;
+  background: var(--gray-900);
   color: white;
-  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
 }
 
 .nav-icon {
-  font-size: 1.1em;
+  font-size: 1rem;
   width: 20px;
   text-align: center;
 }
@@ -45,11 +43,11 @@
 /* Responsive */
 @media (max-width: 768px) {
   .nav-btn {
-    padding: 10px 12px;
-    font-size: 0.85em;
+    padding: 0.75rem;
+    font-size: 0.8125rem;
   }
   
   .nav-icon {
-    font-size: 1em;
+    font-size: 0.875rem;
   }
 }
