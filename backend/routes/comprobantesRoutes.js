@@ -4,7 +4,7 @@ const comprobanteController = require('../controllers/comprobantesController');
 
 // Tipos de comprobante
 router.get('/comprobantes/tipos', comprobanteController.getTiposComprobante);
-
+console.log('✅ ComprobantesRoutes cargadas');
 // CRUD de comprobantes
 router.get('/comprobantes', comprobanteController.getComprobantes);
 router.post('/comprobantes', comprobanteController.createComprobante);

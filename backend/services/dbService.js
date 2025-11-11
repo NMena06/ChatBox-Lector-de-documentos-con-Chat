@@ -57,6 +57,78 @@ class DBService {
       return {};
     }
   }
+async createComprobante(req, res) {
+  console.log('\x1b[31mThcreateComprobante comprobanteController!\x1b[0m');
+  try {
+    const schema = await dbService.getSchema(); // Obtener schema de tablas
+    const {
+      id_tipo_comprobante,
+      id_cliente,
+      numero,
+      fecha,
+      total,
+      estado = 'Pendiente',
+      observaciones = '',
+      items = []
+    } = req.body;
+
+    // Validar campos obligatorios
+    if (!id_tipo_comprobante || !numero || !fecha || total === undefined) {
+      return res.status(400).json({
+        success: false,
+        error: 'Faltan campos obligatorios: tipo, número, fecha y total'
+      });
+    }
+
+    // Insertar comprobante principal
+    const comprobante = await dbService.insertRecord(
+      'Comprobantes',
+      {
+        id_tipo_comprobante: parseInt(id_tipo_comprobante),
+        id_cliente: id_cliente ? parseInt(id_cliente) : null,
+        numero: numero.toString(),
+        fecha,
+        total: parseFloat(total),
+        estado,
+        observaciones
+      },
+      schema
+    );
+
+    const comprobanteId = comprobante.data.id;
+
+    // Insertar detalle de items
+    for (const item of items) {
+      await dbService.insertRecord(
+        'ComprobanteDetalle',
+        {
+          id_comprobante: comprobanteId,
+          id_articulo: parseInt(item.id_articulo),
+          cantidad: parseFloat(item.cantidad),
+          precio_unitario: parseFloat(item.precio),
+          descuento: parseFloat(item.descuento || 0),
+          iva: parseFloat(item.iva || 21)
+        },
+        schema
+      );
+    }
+
+    res.json({
+      success: true,
+      message: 'Comprobante y detalle guardados correctamente',
+      data: { id: comprobanteId }
+    });
+
+  } catch (error) {
+    console.error('❌ Error creando comprobante:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+}
+
+
   // Obtener tipos de artículo
   async getTiposArticulo() {
     try {

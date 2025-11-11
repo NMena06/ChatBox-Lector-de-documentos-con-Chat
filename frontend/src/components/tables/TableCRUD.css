@@ -58,7 +58,7 @@
 }
 
 .stat-value.income {
-  color: #27ae60;
+  color: #34495e;
 }
 
 .stat-value.expense {
@@ -216,7 +216,7 @@
 }
 
 .add-button {
-  background: #27ae60;
+  background: #34495e;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -439,7 +439,7 @@
 }
 
 .save-btn:hover {
-  background: #27ae60;
+  background: #34495e;
   color: white;
   transform: translateY(-1px);
 }
@@ -795,7 +795,7 @@
 
 .filters-active {
   font-size: 0.8rem;
-  color: #28a745;
+  color: #34495e;
   font-weight: 600;
   background: #d4edda;
   padding: 0.25rem 0.5rem;

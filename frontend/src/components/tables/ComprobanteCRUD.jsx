@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Swal from 'sweetalert2';
 import './ComprobanteCRUD.css';
 
@@ -15,24 +15,25 @@ const ComprobanteCRUD = ({
   const [articulos, setArticulos] = useState([]);
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({ id_articulo: '', cantidad: '', precio: '' });
-const [isAccordionOpen, setIsAccordionOpen] = useState(true); 
-  const safeNewRow = newRow || {
-  id_tipo_comprobante: '',
-  id_cliente: '',
-  numero: '',
-  fecha: new Date().toISOString().split('T')[0],
-  total: 0,
-  estado: 'pendiente',
-  observaciones: ''
-};
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
 
+  const toggleAccordion = useCallback(() => {
+    setIsAccordionOpen(prev => !prev);
+  }, []);
+
+  const SafeNewRow = newRow || {
+    id_tipo_comprobante: '',
+    id_cliente: '',
+    numero: '',
+    fecha: new Date().toISOString().split('T')[0],
+    total: 0,
+    estado: 'pendiente',
+    observaciones: ''
+  };
 
   useEffect(() => {
     loadDatosIniciales();
-    if (!tableData || tableData.length === 0) {
-      setIsAccordionOpen(true);
-    }
-  }, [tableData]);
+  }, []);
 
   const loadDatosIniciales = async () => {
     try {
@@ -66,8 +67,8 @@ const [isAccordionOpen, setIsAccordionOpen] = useState(true);
       try {
         const response = await fetch(`http://localhost:3001/api/comprobantes/proximo-numero/${tipoIdNum}`);
         const data = await response.json();
-        if (data.success) {
-          setNewRow(prev => ({ ...prev, numero: data.data.numero }));
+        if (data.success && data.data?.numero) {
+          setNewRow(prev => ({ ...prev, numero: data.data.numero, id_tipo_comprobante: tipoIdNum }));
         }
       } catch (error) {
         console.error('Error generando número:', error);
@@ -75,14 +76,20 @@ const [isAccordionOpen, setIsAccordionOpen] = useState(true);
     }
   };
 
-  // 🔥 Calcular total automáticamente
   useEffect(() => {
     const total = items.reduce((sum, i) => sum + parseFloat(i.subtotal || 0), 0);
     setNewRow(prev => ({ ...prev, total }));
   }, [items]);
 
   const handleAddComprobante = async () => {
-    if (!newRow.id_tipo_comprobante || !newRow.id_cliente || !newRow.numero || !newRow.fecha) {
+    const datos = newRow && Object.keys(newRow).length > 0 ? newRow : SafeNewRow;
+
+    if (
+      !datos.id_tipo_comprobante ||
+      !datos.id_cliente ||
+      !datos.numero ||
+      !datos.fecha
+    ) {
       Swal.fire('Campos requeridos', 'Complete tipo, cliente, número y fecha', 'warning');
       return;
     }
@@ -95,13 +102,13 @@ const [isAccordionOpen, setIsAccordionOpen] = useState(true);
     setLoading(true);
     try {
       const comprobanteData = {
-        id_tipo_comprobante: parseInt(newRow.id_tipo_comprobante),
-        id_cliente: parseInt(newRow.id_cliente),
-        numero: newRow.numero.toString(),
-        fecha: newRow.fecha,
-        total: parseFloat(newRow.total) || 0,
-        estado: newRow.estado || 'pendiente',
-        observaciones: newRow.observaciones || '',
+        id_tipo_comprobante: parseInt(datos.id_tipo_comprobante),
+        id_cliente: parseInt(datos.id_cliente),
+        numero: datos.numero.toString().trim(),
+        fecha: datos.fecha,
+        total: parseFloat(datos.total) || 0,
+        estado: datos.estado || 'pendiente',
+        observaciones: datos.observaciones || '',
         items
       };
 
@@ -118,10 +125,10 @@ const [isAccordionOpen, setIsAccordionOpen] = useState(true);
         setNewRow({});
         setItems([]);
         setIsAccordionOpen(false);
-        window.location.reload();
       } else {
-        throw new Error(data.error || 'Error desconocido');
+        throw new Error(data.error || 'Error desconocido al crear comprobante');
       }
+
     } catch (error) {
       console.error('Error creando comprobante:', error);
       Swal.fire('Error', error.message, 'error');
@@ -185,7 +192,6 @@ const [isAccordionOpen, setIsAccordionOpen] = useState(true);
             ))}
           </select>
         );
-
       case 'textarea':
         return (
           <textarea
@@ -196,34 +202,11 @@ const [isAccordionOpen, setIsAccordionOpen] = useState(true);
             className="form-input textarea"
           />
         );
-
-      case 'date':
-        return (
-          <input
-            type="date"
-            value={value || fieldConfig.defaultValue}
-            onChange={(e) => onChange(e.target.value)}
-            className="form-input"
-          />
-        );
-
-      case 'number':
-        return (
-          <input
-            type="number"
-            step={fieldConfig.step}
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            className="form-input"
-            placeholder={fieldConfig.placeholder}
-            disabled={fieldConfig.disabled}
-          />
-        );
-
       default:
         return (
           <input
-            type="text"
+            type={fieldConfig.type || 'text'}
+            step={fieldConfig.step}
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={fieldConfig.placeholder}
@@ -236,133 +219,176 @@ const [isAccordionOpen, setIsAccordionOpen] = useState(true);
 
   return (
     <div className="comprobante-crud">
-      <div className={`accordion-content ${isAccordionOpen ? 'open' : ''}`}>
-        <div className="add-row-form scrollable">
-          <h3>📄 Nuevo Comprobante</h3>
-
-          <div className="form-fields grid-2">
-            <div>
-              <label>Tipo *</label>
-              {renderFormField('id_tipo_comprobante', safeNewRow.id_tipo_comprobante, handleTipoChange)}
-            </div>
-            <div>
-              <label>Cliente *</label>
-              {renderFormField('id_cliente', safeNewRow.id_cliente, (v) => handleFieldChange('id_cliente', v))}
-            </div>
-            <div>
-              <label>Número *</label>
-              {renderFormField('numero', safeNewRow.numero, (v) => handleFieldChange('numero', v), { disabled: true })}
-            </div>
-            <div>
-              <label>Fecha *</label>
-              {renderFormField('fecha', safeNewRow.fecha, (v) => handleFieldChange('fecha', v))}
-            </div>
-            <div>
-              <label>Total</label>
-              {renderFormField('total', safeNewRow.total, () => {}, { disabled: true })}
-            </div>
-            <div>
-              <label>Estado</label>
-              {renderFormField('estado', safeNewRow.estado, (v) => handleFieldChange('estado', v))}
-            </div>
+      {/* 🧱 Acordeón */}
+      <div className="add-row-accordion">
+        <div
+          className={`accordion-header ${isAccordionOpen ? 'open' : ''}`}
+          onClick={toggleAccordion}
+        >
+          <div className="accordion-title">
+            <span className="accordion-icon">📥</span>
+            Crear Nuevo Comprobante
           </div>
+          <div className="accordion-arrow">{isAccordionOpen ? '▲' : '▼'}</div>
+        </div>
 
-          <div className="form-field-group full-width">
-            <label>Observaciones</label>
-            {renderFormField('observaciones', safeNewRow.observaciones, (v) => handleFieldChange('observaciones', v))}
-          </div>
+        <div className={`accordion-content ${isAccordionOpen ? 'open' : ''}`}>
+          <div className="add-row-form scrollable">
+            <h3>📄 Nuevo Comprobante</h3>
+            <div className="form-fields grid-2">
+              <div>
+                <label>Tipo *</label>
+                {renderFormField('id_tipo_comprobante', newRow.id_tipo_comprobante, handleTipoChange)}
+              </div>
+              <div>
+                <label>Cliente *</label>
+                {renderFormField('id_cliente', newRow.id_cliente, (v) => handleFieldChange('id_cliente', v))}
+              </div>
+              <div>
+                <label>Número *</label>
+                {renderFormField('numero', newRow.numero, (v) => handleFieldChange('numero', v))}
+              </div>
+              <div>
+                <label>Fecha *</label>
+                {renderFormField('fecha', newRow.fecha, (v) => handleFieldChange('fecha', v))}
+              </div>
+              <div>
+                <label>Total</label>
+                {renderFormField('total', newRow.total, (v) => handleFieldChange('total', v))}
+              </div>
+              <div>
+                <label>Estado</label>
+                {renderFormField('estado', newRow.estado, (v) => handleFieldChange('estado', v))}
+              </div>
+            </div>
 
-          {/* 🧾 Ítems */}
-          <div className="items-section">
-            <h4>🧾 Detalle de artículos</h4>
-            <div className="item-form">
-              <select
-                value={newItem.id_articulo}
-                onChange={(e) => setNewItem({ ...newItem, id_articulo: e.target.value })}
-                className="form-input small"
-              >
-                <option value="">Seleccionar artículo</option>
-                {articulos.map((a) => (
-                  <option key={a.id} value={a.id}>{a.nombre}</option>
-                ))}
-              </select>
-              <input
-                type="number"
-                placeholder="Cantidad"
-                value={newItem.cantidad}
-                onChange={(e) => setNewItem({ ...newItem, cantidad: e.target.value })}
-                className="form-input small"
-              />
-              <input
-                type="number"
-                step="0.01"
-                placeholder="Precio"
-                value={newItem.precio}
-                onChange={(e) => setNewItem({ ...newItem, precio: e.target.value })}
-                className="form-input small"
-              />
+            <div className="form-field-group full-width">
+              <label>Observaciones</label>
+              {renderFormField('observaciones', newRow.observaciones, (v) => handleFieldChange('observaciones', v))}
+            </div>
+
+            {/* 🧾 Ítems */}
+            <div className="items-section">
+              <h4>🧾 Detalle de artículos</h4>
+              <div className="item-form">
+                <select
+                  value={newItem.id_articulo}
+                  onChange={(e) => setNewItem({ ...newItem, id_articulo: e.target.value })}
+                  className="form-input small"
+                >
+                  <option value="">Seleccionar artículo</option>
+                  {articulos.map((a) => (
+                    <option key={a.id} value={a.id}>{a.nombre}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  placeholder="Cantidad"
+                  value={newItem.cantidad}
+                  onChange={(e) => setNewItem({ ...newItem, cantidad: e.target.value })}
+                  className="form-input small"
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Precio"
+                  value={newItem.precio}
+                  onChange={(e) => setNewItem({ ...newItem, precio: e.target.value })}
+                  className="form-input small"
+                />
+                <button
+                  onClick={() => {
+                    if (!newItem.id_articulo || !newItem.cantidad || !newItem.precio) return;
+                    const subtotal = parseFloat(newItem.cantidad) * parseFloat(newItem.precio);
+                    setItems([...items, { ...newItem, subtotal }]);
+                    setNewItem({ id_articulo: '', cantidad: '', precio: '' });
+                  }}
+                  className="add-item-btn"
+                >
+                  ➕ Agregar
+                </button>
+              </div>
+
+              {items.length > 0 && (
+                <table className="items-table">
+                  <thead>
+                    <tr>
+                      <th>Artículo</th>
+                      <th>Cantidad</th>
+                      <th>Precio</th>
+                      <th>Subtotal</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((i, idx) => (
+                      <tr key={idx}>
+                        <td>{articulos.find(a => a.id == i.id_articulo)?.nombre || '-'}</td>
+                        <td>{i.cantidad}</td>
+                        <td>${parseFloat(i.precio).toLocaleString('es-AR')}</td>
+                        <td>${i.subtotal.toLocaleString('es-AR')}</td>
+                        <td>
+                          <button
+                            className="delete-btn"
+                            onClick={() => setItems(items.filter((_, j) => j !== idx))}
+                          >
+                            🗑️
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="form-actions">
+              <button onClick={handleAddComprobante} className="add-button" disabled={loading}>
+                {loading ? '⏳ Creando...' : '💾 Crear Comprobante'}
+              </button>
               <button
                 onClick={() => {
-                  if (!newItem.id_articulo || !newItem.cantidad || !newItem.precio) return;
-                  const subtotal = parseFloat(newItem.cantidad) * parseFloat(newItem.precio);
-                  setItems([...items, { ...newItem, subtotal }]);
-                  setNewItem({ id_articulo: '', cantidad: '', precio: '' });
+                  setIsAccordionOpen(false);
+                  setNewRow({});
+                  setItems([]);
                 }}
-                className="add-item-btn"
+                className="cancel-button"
               >
-                ➕ Agregar
+                ❌ Cancelar
               </button>
             </div>
-
-            {items.length > 0 && (
-              <table className="items-table">
-                <thead>
-                  <tr>
-                    <th>Artículo</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((i, idx) => (
-                    <tr key={idx}>
-                      <td>{articulos.find(a => a.id == i.id_articulo)?.nombre || '-'}</td>
-                      <td>{i.cantidad}</td>
-                      <td>${parseFloat(i.precio).toLocaleString('es-AR')}</td>
-                      <td>${i.subtotal.toLocaleString('es-AR')}</td>
-                      <td>
-                        <button
-                          className="delete-btn"
-                          onClick={() => setItems(items.filter((_, j) => j !== idx))}
-                        >
-                          🗑️
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-
-          <div className="form-actions">
-            <button onClick={handleAddComprobante} className="add-button" disabled={loading}>
-              {loading ? '⏳ Creando...' : '💾 Crear Comprobante'}
-            </button>
-            <button
-              onClick={() => {
-                setIsAccordionOpen(false);
-                setNewRow({});
-                setItems([]);
-              }}
-              className="cancel-button"
-            >
-              ❌ Cancelar
-            </button>
           </div>
         </div>
+      </div>
+
+      {/* 📋 Tabla de comprobantes */}
+      <div className="table-container scrollable">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tipo</th>
+              <th>Cliente</th>
+              <th>Número</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableData?.map(c => (
+              <tr key={c.id}>
+                <td>{c.id}</td>
+                <td>{tiposComprobante.find(t => t.id == c.id_tipo_comprobante)?.nombre || c.id_tipo_comprobante}</td>
+                <td>{clientes.find(cl => cl.id == c.id_cliente)?.nombre || c.id_cliente}</td>
+                <td>{c.numero}</td>
+                <td>{c.fecha}</td>
+                <td>{c.total}</td>
+                <td>{c.estado}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
